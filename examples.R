@@ -1,4 +1,5 @@
 ### A demo for "DR.R"
+### Disclaimer: I am NOT the author of this code. This code was written by Yen-Chi Chen.
 ### The GPS dataset is from UCI repository:
 ###     https://archive.ics.uci.edu/ml/datasets/GPS+Trajectories
 ### Please download the dataset using the above link.
