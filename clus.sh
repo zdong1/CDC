@@ -10,6 +10,7 @@ R
 > library("sp")
 > library("ggplot2")
 
+# Partition into small files, and filter out redundant information
 
 > demog<-read.csv(file="./MDC/Data/RawData/demographics.csv",header=FALSE,sep="\t")
 > gps<-read.csv(file="./MDC/Data/RawData/gps.csv",header=FALSE,sep="\t")
