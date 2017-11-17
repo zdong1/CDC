@@ -15,5 +15,5 @@ Yen-Chi Chen, Adrian Dobra, Zhihang Dong
 ## Updates
 
 ### Update 7-Nov
-Created partitioner file in R.
-Uploaded pre-processing shell scripts 
+1. Created partitioner file in R.
+2. Uploaded pre-processing shell scripts 
