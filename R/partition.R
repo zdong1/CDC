@@ -15,3 +15,6 @@ head(gps, n=10)
 # Rename the column...
 colnames(gps.s)<-c("db_key","time","long","lat","deltat")
 head(gps.s, n=10)
+# Save this into RData, the size shrinked to 1G --> 150M 
+save(gps.s,file="./gps.s.Rda")
+quit()
