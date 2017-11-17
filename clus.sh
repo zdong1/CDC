@@ -3,6 +3,14 @@ srun --pty --time=1200 --mem-per-cpu=10240 --partition=largemem /bin/bash
 module load R
 R
 # All CDC Files are tab-delimited...
+###################################
+# Load the Required Package 
+###################################
+> library("dplyr")
+> library("sp")
+> library("ggplot2")
+
+
 > demog<-read.csv(file="./MDC/Data/RawData/demographics.csv",header=FALSE,sep="\t")
 > gps<-read.csv(file="./MDC/Data/RawData/gps.csv",header=FALSE,sep="\t")
 # Test Everything is right...
