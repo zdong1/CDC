@@ -28,6 +28,5 @@ rec.f <- read.csv.ffdf(file="./MDC/Data/RawData/records.csv"#,options)
 
 #creates a ffdf object 
 class(rec.f)
-                       
-                       
+                                         
 quit()
