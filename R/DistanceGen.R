@@ -7,10 +7,10 @@ library("geosphere")
 # load("d0_one.Rdata") -- See Github repository
 
 get.api.key()
-
-trial1<-gmapsdistance(origin="46.5255+6.65218", destination = "46.5240+6.61600",mode="walking")
-trial1
-trial1$Distance
+d0_one<-read.csv(file="person_5578.csv",header=FALSE, sep=",")
+# trial1<-gmapsdistance(origin="46.5255+6.65218", destination = "46.5240+6.61600",mode="walking")
+# trial1
+# trial1$Distance
 # trim the dataset
 d0<-d0_one[c(1,4:6)]
 colnames(d0)<-c("db_key","time","lat","lon")
@@ -34,10 +34,38 @@ for (i in 1:(nrow(d0)-1)){
   d0$sum.dist[1]<-d0$dist[1]
   d0$sum.dist[i+1]<-d0$sum.dist[i]+d0$dist[i+1]
   d0$sum.t[1]<-d0$t.delta[1]
-  d0$sum.t[i+1]<-d0$sum.t[i]+d0$t.delta[i]
+  d0$sum.t[i+1]<-d0$sum.t[i]+d0$t.delta[i+1]
+  d0$vel[i] <-d0$sum.dist[i]/d0$sum.t[i]
 }
 
-plot(d0$sum.t,d0$sum.dist,cex=0.4, pch=19, col="pink",
-     xlab="Cumulative time",ylab="Cumulative Distance")
+plot(d0$sum.t,d0$vel,cex=0.4, pch=19, col="darkorange",
+     xlab="Cumulative time",ylab="Velocity",ylim=c(0,2))
 lo <- loess(d0$sum.t~d0$sum.dist)
 lines(lo, col='blue', lwd=1) # this looks weird...
+
+
+#############################################
+# replicate this method on another person
+#############################################
+# TODO: use std.in to read a file, and provide output from std.out
+#############################################
+d1_one<-read.csv(file="person_5479.csv",header=FALSE, sep=",")
+d1<-d1_one[c(1,4:6)]
+colnames(d1)<-c("db_key","time","lat","lon")
+d1<-d1[order(d1$time),]     # or attach(d1); d1<-d1[order(time),]
+for (i in 1:(nrow(d1)-1)){
+  d1$dist[i]<-distHaversine(c(d1$lon[i],d1$lat[i]), c(d1$lon[i+1],d1$lat[i+1]))
+  d1$t.delta[i]<-d1$time[i+1]-d1$time[i]
+  d1$sum.dist[1]<-d1$dist[1]
+  d1$sum.dist[i+1]<-d1$sum.dist[i]+d1$dist[i+1]
+  d1$sum.t[1]<-d1$t.delta[1]
+  d1$sum.t[i+1]<-d1$sum.t[i]+d1$t.delta[i+1]
+  d1$vel[i] <-d1$sum.dist[i]/d1$sum.t[i]
+}
+
+plot(d0$sum.t,d0$vel,cex=0.4, pch=19, col="darkorange",
+     xlab="Cumulative time",ylab="Velocity",ylim=c(0,2))
+points(d1$sum.t,d1$vel,cex=0.4, pch=19, col="pink",
+       xlab="Cumulative time",ylab="Velocity",ylim=c(0,2))
+legend(4.7e+06,2.07,c("Person 1 - M", "Person 2- F"),
+       lty=c(1,1), lwd=c(2.5,2.5),col=c("darkorange","pink")) 
