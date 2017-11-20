@@ -3,7 +3,7 @@
 # install.packages("gmapsdistance")
 library("gmapsdistance")
 library("geosphere")
-# Sample data: 3700 observations of a person in CDC (very small partition of a partition...)
+# Sample data: 10900 observations of a person in CDC (very small partition of a partition...)
 # load("d0_one.Rdata") -- See Github repository
 
 get.api.key()
