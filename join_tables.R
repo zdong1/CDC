@@ -14,4 +14,5 @@ rec.l<-subset(rec.l,long!="NA")
 # > 11758820/185
 # [1] 63561.19
 
-
+# save the linked file as CSV format
+save(rec.l,file="./MDCRes/rec.l.csv")
