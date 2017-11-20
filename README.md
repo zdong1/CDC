@@ -14,6 +14,10 @@ Yen-Chi Chen, Adrian Dobra, Zhihang Dong
 
 ## Updates
 
+### Update 19-Nov
+1. Update the partitioner file in R for larger files (>5G)
+2. Update the R scripts calculating the geodistance, and merged the two tables
+3. Complete the demographics files.
 ### Update 7-Nov
 1. Created partitioner file in R.
 2. Uploaded pre-processing shell scripts 
