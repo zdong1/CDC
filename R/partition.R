@@ -1,9 +1,8 @@
 ###################################
 # Load the Required Package 
-# Actually the packages below won't be used lol...
 ###################################
 library("dplyr")
-library("sp")
+library("datatable")
 library("ggplot2")
 
 # Partition into small files, and filter out redundant information
@@ -18,4 +17,10 @@ colnames(gps.s)<-c("db_key","time","long","lat","deltat")
 head(gps.s, n=10)
 # Save this into RData, the size shrinked to 1G --> 150M 
 save(gps.s,file="./MDCRes/gps.s.Rda")
+
+# Read records file, very large (5G), use fread
+url<-("./MDC/Data/RawData/records.csv")
+system.time(rec <- fread(url))
+
+
 quit()
