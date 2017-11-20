@@ -3,6 +3,12 @@
 # install.packages("gmapsdistance")
 library("gmapsdistance")
 library("geosphere")
+library(sp)
+require(sp)
+
+
+
+
 # Sample data: 10900 observations of a person in CDC (very small partition of a partition...)
 # load("d0_one.Rdata") -- See Github repository
 
@@ -17,6 +23,9 @@ colnames(d0)<-c("db_key","time","lat","lon")
 # sort the data set by time
 d0<-d0[order(d0$time),]     # or attach(d0); d0<-do[order(time)]
 
+coordinates(d0)<- ~ lon+lat
+proj4string(d0) <- CRS("+proj=longlat +datum=WGS84")
+
 # TODO: Solve - Google API returned an error: You have exceeded your daily request quota for this API.
 # pair<-paste(d0$lon[1],"+",d0$lat[1],sep="") # sep="" removes the white space
 
@@ -30,12 +39,13 @@ d0<-d0[order(d0$time),]     # or attach(d0); d0<-do[order(time)]
 # Alternative: use geosphere package
 for (i in 1:(nrow(d0)-1)){
   d0$dist[i]<-distHaversine(c(d0$lon[i],d0$lat[i]), c(d0$lon[i+1],d0$lat[i+1]))
+  d0$dists[i]<-spDistsN1(pts= d0[i,], pt= d0[i+1,], longlat=TRUE)
   d0$t.delta[i]<-d0$time[i+1]-d0$time[i]
-  d0$sum.dist[1]<-d0$dist[1]
-  d0$sum.dist[i+1]<-d0$sum.dist[i]+d0$dist[i+1]
+  d0$sum.dists[1]<-d0$dists[1]
+  d0$sum.dists[i+1]<-d0$sum.dists[i]+d0$dists[i+1]
   d0$sum.t[1]<-d0$t.delta[1]
   d0$sum.t[i+1]<-d0$sum.t[i]+d0$t.delta[i+1]
-  d0$vel[i] <-d0$sum.dist[i]/d0$sum.t[i]
+  d0$vel[i] <-d0$sum.dists[i]/d0$sum.t[i]
 }
 
 
@@ -58,9 +68,9 @@ for (i in 1:(nrow(d1)-1)){
   d1$vel[i] <-d1$sum.dist[i]/d1$sum.t[i]
 }
 
-plot(log(d0$sum.t), log(d0$vel), type="l", lty = 1, lwd=2, col="darkorange",
-     xlab="Logged Cumulative time (s)", xlim=c(2,16), ylab="Logged Velocity (m/s)",
-     ylim=c(-2,2))
+plot(log(d0$sum.t), (d0$vel)*3600, type="l", lty = 1, lwd=2, col="darkorange",
+     xlab="Logged Cumulative time (s)", xlim=c(2,16), ylab="Velocity (m/h)",
+     ylim=c(0,20))
 lines(log(d1$sum.t), log(d1$vel), lty = 1, lwd=2, col="pink")
 legend(9,2.07,c("Person 1 - M", "Person 2- F"),
        lty=c(1,1), lwd=c(2.5,2.5),col=c("darkorange","pink")) 
