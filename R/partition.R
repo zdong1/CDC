@@ -3,7 +3,7 @@
 ###################################
 library("dplyr")
 library("datatable")
-library("ggplot2")
+library("ff")
 
 # Partition into small files, and filter out redundant information
 # Note all of the CDC data are tab-delimited
@@ -22,5 +22,12 @@ save(gps.s,file="./MDCRes/gps.s.Rda")
 url<-("./MDC/Data/RawData/records.csv")
 system.time(rec <- fread(url))
 
+# Another option is using ff function, using which is up to you
+# creating the file
+rec.f <- read.csv.ffdf(file="./MDC/Data/RawData/records.csv"#,options)
 
+#creates a ffdf object 
+class(rec.f)
+                       
+                       
 quit()
