@@ -38,7 +38,7 @@ proj4string(d0) <- CRS("+proj=longlat +datum=WGS84")
 
 # Alternative: use geosphere package
 for (i in 1:(nrow(d0)-1)){
-  d0$dist[i]<-distHaversine(c(d0$lon[i],d0$lat[i]), c(d0$lon[i+1],d0$lat[i+1]))
+  # d0$dist[i]<-distHaversine(c(d0$lon[i],d0$lat[i]), c(d0$lon[i+1],d0$lat[i+1]))
   d0$dists[i]<-spDistsN1(pts= d0[i,], pt= d0[i+1,], longlat=TRUE)
   d0$t.delta[i]<-d0$time[i+1]-d0$time[i]
   d0$sum.dists[1]<-d0$dists[1]
