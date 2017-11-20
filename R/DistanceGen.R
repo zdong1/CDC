@@ -38,11 +38,6 @@ for (i in 1:(nrow(d0)-1)){
   d0$vel[i] <-d0$sum.dist[i]/d0$sum.t[i]
 }
 
-plot(d0$sum.t,d0$vel,cex=0.4, pch=19, col="darkorange",
-     xlab="Cumulative time",ylab="Velocity",ylim=c(0,2))
-lo <- loess(d0$sum.t~d0$sum.dist)
-lines(lo, col='blue', lwd=1) # this looks weird...
-
 
 #############################################
 # replicate this method on another person
@@ -63,9 +58,10 @@ for (i in 1:(nrow(d1)-1)){
   d1$vel[i] <-d1$sum.dist[i]/d1$sum.t[i]
 }
 
-plot(d0$sum.t,d0$vel,cex=0.4, pch=19, col="darkorange",
-     xlab="Cumulative time",ylab="Velocity",ylim=c(0,2))
-points(d1$sum.t,d1$vel,cex=0.4, pch=19, col="pink",
-       xlab="Cumulative time",ylab="Velocity",ylim=c(0,2))
-legend(4.7e+06,2.07,c("Person 1 - M", "Person 2- F"),
+plot(log(d0$sum.t), log(d0$vel), type="l", lty = 1, lwd=2, col="darkorange",
+     xlab="Logged Cumulative time (s)", xlim=c(2,16), ylab="Logged Velocity (m/s)",
+     ylim=c(-2,2))
+lines(log(d1$sum.t), log(d1$vel), lty = 1, lwd=2, col="pink")
+legend(9,2.07,c("Person 1 - M", "Person 2- F"),
        lty=c(1,1), lwd=c(2.5,2.5),col=c("darkorange","pink")) 
+
