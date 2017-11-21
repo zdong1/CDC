@@ -42,14 +42,15 @@ d1_one<-read.csv(file="person_5479.csv",header=FALSE, sep=",")
 d1<-d1_one[c(1,4:6)]
 colnames(d1)<-c("db_key","time","lat","lon")
 d1<-d1[order(d1$time),]     # or attach(d1); d1<-d1[order(time),]
-coordinates(d1)<- ~ lon+lat
-proj4string(d1) <- CRS("+proj=longlat +datum=WGS84")
-class(d1@data$time)=c('POSIXt','POSIXct')
+
 
 
 ## HAVE BUGSSS!!!!!!!!!!!
 input<-d1
 genDist<-function(input){
+  coordinates(input)<- ~ lon+lat
+  proj4string(input) <- CRS("+proj=longlat +datum=WGS84")
+  class(input@data$time)=c('POSIXt','POSIXct')
   for (i in 1:(nrow(input)-1)){
     input@data$dists[nrow(input)]<-0
     input@data$dists[i]<-spDistsN1(pts= input[i,], pt= input[i+1,], longlat=TRUE)
