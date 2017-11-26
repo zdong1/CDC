@@ -44,51 +44,34 @@ colnames(d1)<-c("db_key","time","lat","lon")
 d1<-d1[order(d1$time),]     # or attach(d1); d1<-d1[order(time),]
 
 
-
-## HAVE BUGSSS!!!!!!!!!!!
-input<-d1
-genDist<-function(input){
-  coordinates(input)<- ~ lon+lat
-  proj4string(input) <- CRS("+proj=longlat +datum=WGS84")
-  class(input@data$time)=c('POSIXt','POSIXct')
-  for (i in 1:(nrow(input)-1)){
-    input@data$dists[nrow(input)]<-0
-    input@data$dists[i]<-spDistsN1(pts= input[i,], pt= input[i+1,], longlat=TRUE)
-    input@data$t.delta[nrow(input)]<-0
-    input@data$t.delta[i]<-difftime(input@data$time[i+1],input@data$time[i],units="hours")
-    input@data$sum.dists[1]<-input@data$dists[1]
-    input@data$sum.dists[i+1]<-input@data$sum.dists[i]+input@data$dists[i+1]
-    input@data$sum.t[1]<-input@data$t.delta[1]
-    input@data$sum.t[i+1]<-input@data$sum.t[i]+ input@data$t.delta[i+1]
-    input@data$vel[i] <-input@data$sum.dists[i]/input@data$sum.t[i]
+## No more bugs
+genDist<-function(raw){
+  coordinates(raw)<- ~ lon+lat
+  proj4string(raw) <- CRS("+proj=longlat +datum=WGS84")
+  class(raw@data$time)=c('POSIXt','POSIXct')
+  for (i in 2:(nrow(raw))){
+    raw@data$dists[1]<-0
+    raw@data$dists[i]<-spDistsN1(pts= raw[i-1,], pt= raw[i,], longlat=TRUE)
+    raw@data$t.delta[1]<-0
+    raw@data$t.delta[i]<-difftime(raw@data$time[i],raw@data$time[i-1],units="hours")
+    raw@data$sum.dists[1]<-0
+    raw@data$sum.dists[i]<- raw@data$sum.dists[i-1]+raw@data$dists[i]
+    raw@data$sum.t[1]<-0
+    raw@data$sum.t[i]<- raw@data$sum.t[i-1]+raw@data$t.delta[i]
+    raw@data$vel[i] <-raw@data$sum.dists[i]/raw@data$sum.t[i]
   }
+  raw
 }
-d1.new<-genDist(input=d1)
+
+
+
+d1.new<-genDist(raw=d1)
 #############################################
 # replicate this method on another person
 #############################################
-# TODO: use std.in to read a file, and provide output from std.out
+# TODO: use a function to read files
+# DONE 
 #############################################
 
+summary(d1.new@data$sum.dists)
 
-plot(d1@data, d1$vel, type="l", lty = 1, lwd=2, col="darkorange",
-     xlab="Cumulative Time (h)", ylab="Velocity (m/h)")
-lines(log(d1$sum.t), log(d1$vel), lty = 1, lwd=2, col="pink")
-legend(9,2.07,c("Person 1 - M", "Person 2- F"),
-       lty=c(1,1), lwd=c(2.5,2.5),col=c("darkorange","pink")) 
-
-###### Verify ######
-for (i in 1:(nrow(d1)-1)){
-  d1@data$dists[nrow(d1)]<-0
-  d1@data$dists[i]<-spDistsN1(pts= d1[i,], pt= d1[i+1,], longlat=TRUE)
-  d1@data$t.delta[nrow(d1)]<-0
-  d1@data$t.delta[i]<-difftime(d1@data$time[i+1],d1@data$time[i],units="hours")
-  d1@data$sum.dists[i+1]<-d1@data$sum.dists[i]+d1@data$dists[i+1]
-}
-
-summary(d1@data$sum.dists)
-
-d1@data$sum.dists[1]<-d1@data$dists[1]
-d1@data$sum.t[1]<-d1@data$t.delta[1]
-d1@data$sum.t[i+1]<-d1@data$sum.t[i]+d1@data$t.delta[i+1]
-d1@data$vel[i] <-d1@data$sum.dists[i]/d1@data$sum.t[i]
