@@ -14,3 +14,5 @@ list2env(s, globalenv())
 # > summary(person6272$personid)
 # Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
 # 6272    6272    6272    6272    6272    6272 
+
+save(list=ls(),file="./MDCRes/byperson.Rda")
