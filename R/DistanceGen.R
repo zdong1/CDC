@@ -40,7 +40,7 @@ d1<-d1[order(d1$time),]     # or attach(d1); d1<-d1[order(time),]
 
 ## Main Functions
 genDist<-function(raw){
-  coordinates(raw)<- ~ lon+lat
+  coordinates(raw)<- ~ long+lat
   proj4string(raw) <- CRS("+proj=longlat +datum=WGS84")
   class(raw@data$time)=c('POSIXt','POSIXct')
   for (i in 2:(nrow(raw))){
