@@ -6,6 +6,7 @@ load("byperson.Rda")
 setwd("~/Data/CDC")
 # source("../../DistanceGen.R") - have the functions ready
 
+# Paste the function here
 genDist<-function(raw){
   raw<-raw[order(raw$time),]
   coordinates(raw)<- ~ long+lat
