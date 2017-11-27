@@ -53,6 +53,7 @@ genDist<-function(raw){
     raw@data$sum.dists[i]<- raw@data$sum.dists[i-1]+raw@data$dists[i]
     raw@data$sum.t[1]<-0
     raw@data$sum.t[i]<- raw@data$sum.t[i-1]+raw@data$t.delta[i]
+    raw@data$vel[1] <- 0
     raw@data$vel[i] <-raw@data$sum.dists[i]/raw@data$sum.t[i]
   }
   raw
@@ -61,10 +62,10 @@ genDist<-function(raw){
 # p.xxx <- genDist(raw=personxxx)
 #############################################
 # replicate this method on another person
-#############################################
-# TODO: use a function to read files
-# DONE 
-#############################################
+###############################################################################
+# TODO: Generate Velocity
+# TASK: Velocity has to deal with 0 as denominator, we need a way to cure this
+###############################################################################
 # Examine the Dataset
 summary(d1.new@data$sum.dists)
 
