@@ -38,12 +38,13 @@ colnames(d1)<-c("db_key","time","lat","lon")
 d1<-d1[order(d1$time),]     # or attach(d1); d1<-d1[order(time),]
 
 
-## Main Functions
 genDist<-function(raw){
+  raw<-raw[order(raw$time),]
   coordinates(raw)<- ~ long+lat
   proj4string(raw) <- CRS("+proj=longlat +datum=WGS84")
   class(raw@data$time)=c('POSIXt','POSIXct')
   for (i in 2:(nrow(raw))){
+    sort(raw@data$time)
     raw@data$dists[1]<-0
     raw@data$dists[i]<-spDistsN1(pts= raw[i-1,], pt= raw[i,], longlat=TRUE)
     raw@data$t.delta[1]<-0
@@ -56,8 +57,8 @@ genDist<-function(raw){
   }
   raw
 }
-# Generate this New Dataset
-d1.new<-genDist(raw=d1)
+# Generate data
+# p.xxx <- genDist(raw=personxxx)
 #############################################
 # replicate this method on another person
 #############################################
