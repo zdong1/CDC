@@ -38,12 +38,13 @@ colnames(d1)<-c("db_key","time","lat","lon")
 d1<-d1[order(d1$time),]     # or attach(d1); d1<-d1[order(time),]
 
 
-## Main Functions
 genDist<-function(raw){
-  coordinates(raw)<- ~ lon+lat
+  raw<-raw[order(raw$time),]
+  coordinates(raw)<- ~ long+lat
   proj4string(raw) <- CRS("+proj=longlat +datum=WGS84")
   class(raw@data$time)=c('POSIXt','POSIXct')
   for (i in 2:(nrow(raw))){
+    sort(raw@data$time)
     raw@data$dists[1]<-0
     raw@data$dists[i]<-spDistsN1(pts= raw[i-1,], pt= raw[i,], longlat=TRUE)
     raw@data$t.delta[1]<-0
@@ -52,18 +53,19 @@ genDist<-function(raw){
     raw@data$sum.dists[i]<- raw@data$sum.dists[i-1]+raw@data$dists[i]
     raw@data$sum.t[1]<-0
     raw@data$sum.t[i]<- raw@data$sum.t[i-1]+raw@data$t.delta[i]
+    raw@data$vel[1] <- 0
     raw@data$vel[i] <-raw@data$sum.dists[i]/raw@data$sum.t[i]
   }
   raw
 }
-# Generate this New Dataset
-d1.new<-genDist(raw=d1)
+# Generate data
+# p.xxx <- genDist(raw=personxxx)
 #############################################
 # replicate this method on another person
-#############################################
-# TODO: use a function to read files
-# DONE 
-#############################################
+###############################################################################
+# TODO: Generate Velocity
+# TASK: Velocity has to deal with 0 as denominator, we need a way to cure this
+###############################################################################
 # Examine the Dataset
 summary(d1.new@data$sum.dists)
 
