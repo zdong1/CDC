@@ -1,13 +1,16 @@
-avgSpeed <- function(pid){
-    pid@data$velo[1] <- 0
-    pid@data$velo[j] <- pid@data$dists[j]/pid@data$t.delta[j]
-    pid@data$sum.t[j]<- pid@data$sum.t[j]/168
+avgSpeed<-function(pid){
     df<-pid@data
+    for(j in 2: nrow(df)){
+    df$velo[1]<- 0
+    df$velo[j]<- df$dists[j]/df$t.delta[j]
+    }
+    spd = NULL
     for (k in 1: 52){
-      if (nrow(subset(df,df$sum.t>(k-1) & df$sum.t<k))==0){
+      if (nrow(subset(df,(df$sum.t)/168>(k-1) & (df$sum.t)/168<k))==0){
         spd[k] = NA
       } else{
-        spd[k] <-(subset(df, df$sum.t>(k-1) & df$sum.t<k))$velo 
+        spd[k] <-mean((subset(df, (df$sum.t)/168>(k-1) & (df$sum.t)/168<k))$velo, na.rm=TRUE) 
       }
     }
+    spd
 }
