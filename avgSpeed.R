@@ -4,7 +4,7 @@ library(ggplot2)
 setUpWeek<-function(person){
   test<-person@data
   test$wkdy <- weekdays(as.Date(test$time))
-  test$week <- ceiling(test$sum.dists/168)
+  test$week <- ceiling(test$sum.t/168)
   monday<-test[which(test$wkdy=='Monday'),]
   tues<-test[which(test$wkdy=='Tuesday'),]
   weds<-test[which(test$wkdy=='Wednesday'),]
@@ -15,14 +15,13 @@ setUpWeek<-function(person){
   test
   }
 
-df<-setUpWeek(p.5925)
+df<-setUpWeek(p.5927)
 
 # This draws the function
 drawTrends<-function(flat){
   v1 = NULL
   week = NULL
   v2 = NULL
-  sp<-data.frame(week,v1,v2)
   for (i in 1: max(df$week)){
     week[i] = i
     if(nrow(df[which(df$week==i),]) > 20){
@@ -34,7 +33,7 @@ drawTrends<-function(flat){
     v2[i]<-(rev(df[which(df$week<i+1),10])[1])/(rev(df[which(df$week==i+1),11])[1])
   }
   sp = data.frame(week,v1,v2)
-  mu = mean(flat$s.vel,na.rm=TRUE)
+  mu = rev(flat$s.vel)[1]
   bd = 1.96*sd(flat$vel,na.rm=TRUE)/sqrt(nrow(flat))
   f<-ggplot(sp,aes(week,v1))
   f+geom_point(col="deepskyblue")+geom_line(data=sp,aes(week,v2),col="orange",lwd=1.2)+ 
