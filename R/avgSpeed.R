@@ -51,7 +51,7 @@ drawTrends(df)
 
 
 
-### Weekday Seasonality Plot (Very rough)
+### Weekday Seasonality Plot (Very rough, still developing)
 days1 <- NULL
 days2 <- NULL
 days3 <- NULL
