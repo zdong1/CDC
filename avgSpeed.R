@@ -102,7 +102,4 @@ points(days5,pch=19,cex=1.4,col="burlywood",ylim=c(0,20))
 points(days6,pch=19,cex=1.4,col="red",ylim=c(0,20))
 points(days7,pch=19,cex=1.4,col="orange",ylim=c(0,20))
 abline(h=8,lty=2)
-
-
 plot(days6,type="p",pch=19,ylim=c(0,2))
-
