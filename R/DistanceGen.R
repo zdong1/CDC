@@ -68,4 +68,3 @@ genDist<-function(raw){
 ###############################################################################
 # Examine the Dataset
 summary(d1.new@data$sum.dists)
-
