@@ -1,36 +1,36 @@
 load("twelve.Rda")
 library(ggplot2)
 # This function extract data into flat dataset
-setUpWeek<-function(person){
-  test<-person@data
-  test$wkdy <- weekdays(as.Date(test$time))
-  test$week <- ceiling(test$sum.t/168)
-  monday<-test[which(test$wkdy=='Monday'),]
-  tues<-test[which(test$wkdy=='Tuesday'),]
-  weds<-test[which(test$wkdy=='Wednesday'),]
-  thurs<-test[which(test$wkdy=='Thursday'),]
-  friday<-test[which(test$wkdy=='Friday'),]
-  sats<-test[which(test$wkdy=='Saturday'),]
-  sunday<-test[which(test$wkdy=='Sunday'),]
+setUpWeek <- function(person){
+  test = person@data
+  test$wkdy = weekdays(as.Date(test$time))
+  test$week = ceiling(test$sum.t/168)
+  monday = test[which(test$wkdy=='Monday'),]
+  tues = test[which(test$wkdy=='Tuesday'),]
+  weds = test[which(test$wkdy=='Wednesday'),]
+  thurs = test[which(test$wkdy=='Thursday'),]
+  friday = test[which(test$wkdy=='Friday'),]
+  sats = test[which(test$wkdy=='Saturday'),]
+  sunday = test[which(test$wkdy=='Sunday'),]
   test
 }
 
-df<-setUpWeek(p.5943)
+df = setUpWeek(p.5943)
 
 # This draws the function
-drawTrends<-function(flat){
+drawTrends <- function(flat){
   v1 = NULL
   week = NULL
   v2 = NULL
   for (i in 1: max(df$week)){
     week[i] = i
     if(nrow(df[which(df$week==i),]) > 20){
-      v1[i]<-(rev(df[which(df$week==i),10])[1] - df[which(df$week==i),10][1])/
+      v1[i] = (rev(df[which(df$week==i),10])[1] - df[which(df$week==i),10][1])/
         (rev(df[which(df$week==i),11])[1] - df[which(df$week==i),11][1])
     }  else{
       v1[i] = NA
     }
-    v2[i]<-(rev(df[which(df$week<i+1),10])[1])/(rev(df[which(df$week==i+1),11])[1])
+    v2[i] = (rev(df[which(df$week<i+1),10])[1])/(rev(df[which(df$week==i+1),11])[1])
   }
   sp = data.frame(week,v1,v2)
   mu = rev(flat$s.vel)[1]
