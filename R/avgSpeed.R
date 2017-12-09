@@ -13,9 +13,9 @@ setUpWeek<-function(person){
   sats<-test[which(test$wkdy=='Saturday'),]
   sunday<-test[which(test$wkdy=='Sunday'),]
   test
-  }
+}
 
-df<-setUpWeek(p.5927)
+df<-setUpWeek(p.5943)
 
 # This draws the function
 drawTrends<-function(flat){
@@ -27,18 +27,22 @@ drawTrends<-function(flat){
     if(nrow(df[which(df$week==i),]) > 20){
       v1[i]<-(rev(df[which(df$week==i),10])[1] - df[which(df$week==i),10][1])/
         (rev(df[which(df$week==i),11])[1] - df[which(df$week==i),11][1])
-      }  else{
+    }  else{
       v1[i] = NA
-      }
+    }
     v2[i]<-(rev(df[which(df$week<i+1),10])[1])/(rev(df[which(df$week==i+1),11])[1])
   }
   sp = data.frame(week,v1,v2)
   mu = rev(flat$s.vel)[1]
   bd = 1.96*sd(flat$vel,na.rm=TRUE)/sqrt(nrow(flat))
-  f<-ggplot(sp,aes(week,v1))
-  f+geom_point(col="deepskyblue")+geom_line(data=sp,aes(week,v2),col="orange",lwd=1.2)+ 
+  f  = ggplot(sp,aes(week,v1))
+  f  + geom_point(col="deepskyblue")+
+    geom_smooth(model=loess,col="coral")+
+    geom_line(data=sp,aes(week,v2),col="darkgreen",lwd=1.2)+ 
     ylim(low=0, high =10)+
-    geom_ribbon(aes(ymin = mu - bd, ymax = mu + bd), alpha=0.3)+ 
+    geom_hline(yintercept=rev(df$s.vel)[1],color = "red")+
+    geom_hline(yintercept=(rev(df$s.vel)[1]+bd),linetype="dashed",color = "blue")+
+    geom_hline(yintercept=(rev(df$s.vel)[1]-bd),linetype="dashed",color = "blue")+
     labs(y="Speed (km/h)",title="Week-by-Week and Cumulative Speed")
 }
 
@@ -61,7 +65,7 @@ days7 <- NULL
 
 for (i in 1:108){
   days1[i]<-(rev(monday[which(monday$week==i),10])[1] - monday[which(monday$week==i),10][1])/
-  (rev(monday[which(monday$week==i),11])[1] - monday[which(monday$week==i),11][1])
+    (rev(monday[which(monday$week==i),11])[1] - monday[which(monday$week==i),11][1])
 }
 
 for (i in 1:108){
