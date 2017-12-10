@@ -86,3 +86,34 @@ print(xyplot(obs ~ theo | y, data = Fresults,
                         border = "gray", col = "gray")
                llines(x, y, col = "black", lwd = 2)
              }))
+cca<-pa@coords
+ccpts.a <- as.points(cca[,1], cca[,2])
+ccb<-pb@coords
+ccpts.b <- as.points(ccb[,1], ccb[,2])
+
+
+polyx <- c(0, 0.51, 0.875, 0.62, 0.4)
+polyy <- c(0.23, 0.73, 0.65, 0.13, 0.105)
+poly <- matrix(c(polyx, polyy), nrow = 5,
+               ncol = 2, byrow = F)
+
+plot(ccpts.a, type = "n", xlab = "Eastings",
+     ylab = "Northings")
+points(ccpts.a, pch = 1, cex = 0.4, col = "blue")
+points(ccpts.b, pch = 2, cex = 0.4, col = "red")
+legend("topleft", legend = c("Males",
+                             "Females"), col = c("blue", "red"), bty = "n",
+       pch = 1:2, cex = 0.5)
+polymap(poly, add = T)
+
+d <- seq(1, 10, 0.5)
+khat0 <- khat(ccpts.a, poly, d)
+plot(d, sqrt(khat0/pi) - d, ylim = c(-10,
+                                     35), pch = 19, col = "blue", ylab = "Scaled L(d)",
+     xlab = "Distance, d", cex = 0.5)
+pbind<-rbind(pa,pb)
+Env0 <- Kenv.csr(length(pbind$x), poly,
+                 nsim = 99, d, quiet = T)
+points(d, sqrt(Env0$upper/pi) - d, col = "gray")
+points(d, sqrt(Env0$lower/pi) - d, col = "gray")
+abline(0, 0, col = "red")
