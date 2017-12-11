@@ -1,6 +1,18 @@
+#================================================================================
+# Seasonality and Velocity Summary Plot
+# Author: Zhihang Dong
+# Last Update: 12/11/2017
+#================================================================================
+
 load("twelve.Rda")
 library(ggplot2)
-# This function extract data into flat dataset
+
+# Run Function 1, then Run Func 2 or 3, or both.
+# Func 2 is a summary plot of velocity
+# Func 3 is a seasonality plot of velocity (weekday vs weekend)
+
+
+# Func 1: This function extract data into flat dataset
 setUpWeek <- function(person){
   test = person@data
   test$wkdy = weekdays(as.Date(test$time))
@@ -8,9 +20,9 @@ setUpWeek <- function(person){
   test
 }
 
-daf = setUpWeek(p.5940)
+df = setUpWeek(p.5940)
 
-# This draws the function
+# Func 2: This draws the velocity, both weekly and cumulatively
 drawTrends <- function(flat){
   v1 = NULL
   week = NULL
@@ -47,7 +59,7 @@ drawTrends(df)
 
 
 
-### Weekday Seasonality Plot (Very rough)
+### Func 3: Weekday Seasonality Plot (A bit less rough, update 12/11)
 
 WeekPlot <-function(daf){
   days1 = days2 = days3 = days4 = days5 = days6 = days7 = NULL
@@ -85,5 +97,4 @@ WeekPlot <-function(daf){
   abline(h=8,lty=2)
 }
 
-WeekPlot(daf)
-
+WeekPlot(df)
