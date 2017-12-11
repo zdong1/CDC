@@ -5,6 +5,7 @@ library(sp)
 library(maptools)
 library(lattice)
 
+# pppCov: Change Flat DF into normalized geoframe
 pppCov<- function(pid,norm){
   p<-pid
   df<-data.frame(x=p$long,
@@ -23,11 +24,16 @@ pppCov<- function(pid,norm){
   }
 }
 
-pa<-pppCov(person6087,norm=TRUE)
+# Case Study: person A, C = Male, B, D = Female
+# A, B = Reference Age Group (3), C, D = Elder Age Group (4)
 
+pa<-pppCov(person6087,norm=TRUE)
 pb<-pppCov(person6083,norm=TRUE)  
 pc<-pppCov(person6168,norm=TRUE)
 pd<-pppCov(person5924,norm=TRUE)
+
+# Draw Trajectories
+
 dpp<-data.frame(rbind(coordinates(pa),
                       coordinates(pb),
                       coordinates(pc),
@@ -42,7 +48,7 @@ names(dpp) <- c("x","y","DATASET")
 print(xyplot(y ~ x | DATASET, data = dpp,
              pch = 19, aspect = 1, cex = 0.5))
 
-
+# G-Functions
 set.seed(120109)
 r <- seq(0, sqrt(2)/6, by = 0.001)
 env.a <- envelope(as(pa, "ppp"),
@@ -65,7 +71,8 @@ print(xyplot(obs ~ theo | y, data = Gresults,
                llines(x, y, col = "black", lwd = 2)
              }))
 
-set.seed(300)
+# F-Functions
+set.seed(3000)
 fen.a <- envelope(as(pa, "ppp"),
                     fun = Fest, r = r, nrank = 2, nsim = 99)
 fen.b <- envelope(as(pb, "ppp"), fun = Fest,
@@ -73,7 +80,7 @@ fen.b <- envelope(as(pb, "ppp"), fun = Fest,
 fen.c <- envelope(as(pc, "ppp"),
                       fun = Fest, r = r, nrank = 2, nsim = 99)
 fen.d <- envelope(as(pc, "ppp"),
-                  fun = Fest, r = r, nrank = 2, nsim = 999)
+                  fun = Fest, r = r, nrank = 3, nsim = 99)
 
 Fresults <- rbind(fen.a,fen.b,fen.c,fen.d)
 Fresults <- cbind(Gresults, y = rep(c("Male 2",
@@ -86,10 +93,13 @@ print(xyplot(obs ~ theo | y, data = Fresults,
                         border = "gray", col = "gray")
                llines(x, y, col = "black", lwd = 2)
              }))
+
+# Difference as of K functions
+
 cca<-pa@coords
-ccpts.a <- as.points(cca[,1], cca[,2])
-ccb<-pb@coords
-ccpts.b <- as.points(ccb[,1], ccb[,2])
+ccpts.a <- as.points(cca[1:10000,1], cca[1:10000,2])
+ccd<-pd@coords
+ccpts.d <- as.points(ccd[1:10000,1], ccd[1:10000,2])
 
 
 polyx <- c(0, 0.51, 0.875, 0.62, 0.4)
@@ -100,20 +110,22 @@ poly <- matrix(c(polyx, polyy), nrow = 5,
 plot(ccpts.a, type = "n", xlab = "Eastings",
      ylab = "Northings")
 points(ccpts.a, pch = 1, cex = 0.4, col = "blue")
-points(ccpts.b, pch = 2, cex = 0.4, col = "red")
+points(ccpts.d, pch = 2, cex = 0.4, col = "red")
 legend("topleft", legend = c("Males",
                              "Females"), col = c("blue", "red"), bty = "n",
        pch = 1:2, cex = 0.5)
 polymap(poly, add = T)
 
-d <- seq(1, 10, 0.5)
+d <- seq(0, 1, 0.05)
 khat0 <- khat(ccpts.a, poly, d)
-plot(d, sqrt(khat0/pi) - d, ylim = c(-10,
-                                     35), pch = 19, col = "blue", ylab = "Scaled L(d)",
-     xlab = "Distance, d", cex = 0.5)
-pbind<-rbind(pa,pb)
-Env0 <- Kenv.csr(length(pbind$x), poly,
-                 nsim = 99, d, quiet = T)
-points(d, sqrt(Env0$upper/pi) - d, col = "gray")
-points(d, sqrt(Env0$lower/pi) - d, col = "gray")
-abline(0, 0, col = "red")
+khat1 <- khat(ccpts.d, poly, d)
+detach(package:spatstat) # Kenv.label doesn't work 
+# when spatstat present
+plot(d,khat1-khat0,ylim=c(-0.2,0.2), xlim=c(0,0.8),pch=19,col="blue",ylab=expression(hat(K)(d)[1]-hat(K)(d)[0]),xlab="Distance, d",cex.lab=.7,cex=.5)
+
+lines(d,khat1-khat0)
+Env10 <- Kenv.label(as.points(ccpts.a),as.points(ccpts.d),
+                    poly=poly,nsim=99,d,quiet=F) # splancs func
+points(d,Env10$upper,col="gray",type="l")
+points(d,Env10$lower,col="gray",type="l")
+abline(0,0,col="red")
