@@ -1,4 +1,9 @@
- source("DR.R")
+# ============================================================================================
+# Density Ranking Examples
+# Author: Zhihang Dong
+# Note: Explicitly not written as a function or loop because the need to show each step.
+# ============================================================================================
+source("DR.R")
 df <- read.table("p5924.txt", header=TRUE, 
                      sep="\t")
 df2 <- read.table("p5925.txt", header=TRUE, 
