@@ -36,46 +36,79 @@ for (i in 1:length(dflist)){
 
 
 
+#########################################################
+# return to functions
+#########################################################
+
+
+shrink <- function(df){
+  class(df$time)=c('POSIXt','POSIXct')
+  for (j in 1: nrow(df)){
+    if(sum(df$week==df$week[j]) > 100){
+      df$valid[j] = 1
+    } else{
+      df$valid[j] = 0
+    }
+  }
+  df = df[!df$valid == 0,]
+  df$vel[1] = 0
+  df$t.delta[1] = 0
+  df$dists[1] = 0
+  df$t.delta[1]<-0
+  for (i in 2:nrow(df)){
+    df$t.delta[i]<-difftime(df$time[i],df$time[i-1],units="hours")
+  }
+  df$t.delta[df$t.delta>48] <- 0
+  df$dists[df$t.delta>48] <- 0
+  for (i in 2:nrow(df)){
+    df$sum.dists[i]<- df$sum.dists[i-1]+df$dists[i]
+    df$sum.t[i]<- df$sum.t[i-1]+df$t.delta[i]
+  }
+  df$vel<- df$dists/df$t.delta
+  df$s.vel<-df$sum.dists/df$sum.t
+  df
+}
+
+
+df.new100<-shrink(df100)
+df.new160<-shrink(df160)
 
 # Func 2: This draws the velocity, both weekly and cumulatively
-drawTrends <- function(flat){
-  v1 = NULL
-  week = NULL
-  v2 = NULL
+drawTrends <- function(df){
   gen_mark = NULL
-  if (flat$gen[1] == 1) {
-    gen_mark = "Male"
-  } else if (flat$gen[1] == 2) {
+  if (is.na(df$gen[1])) {
+    gen_mark = "Unknown"
+  } else if (df$gen[1] == 2) {
     gen_mark = "Female"
   } else
-    gen_mark = "Unknown"
-  for (i in 1: max(flat$week)){
+    gen_mark = "Male"
+  week = NULL
+  v1 = NULL
+  v2 = NULL
+  for (i in 1: max(df$week)){
     week[i] = i
-    if(nrow(flat[which(flat$week==i),]) > 20){
-      v1[i] = (rev(flat[which(flat$week==i),10])[1] - flat[which(flat$week==i),10][1])/
-        (rev(flat[which(flat$week==i),11])[1] - flat[which(flat$week==i),11][1])
-    }  else{
-      v1[i] = NA
-    }
-    v2[i] = (rev(flat[which(flat$week<i+1),10])[1])/(rev(flat[which(flat$week==i+1),11])[1])
+    v1[i] = (rev(df[which(df$week==i),10])[1] - df[which(df$week==i),10][1])/
+      (rev(df[which(df$week==i),11])[1] - df[which(df$week==i),11][1])
+    v2[i] = (rev(df[which(df$week<i+1),10])[1])/(rev(df[which(df$week==i+1),11])[1])
   }
   sp = data.frame(week,v1,v2)
-  mu = rev(flat$s.vel)[1]
+  mu = rev(df$s.vel)[1]
   # bd = 1.96*sd(sp$v1,na.rm=TRUE)/sqrt(nrow(sp)) #band necessary?
   f  = ggplot(sp,aes(week,v1))
   f  + geom_point(col="deepskyblue", cex=2, pch=18)+
     geom_smooth(model=loess,col="firebrick",lwd= 0.6)+
     geom_line(data=sp,aes(week,v2),col="darkgreen",lwd=0.8)+
-    geom_line(data=flat,aes(week,s.vel),col="darkgoldenrod",lwd=0.3)+
-    ylim(low=0, high =10)+
-    geom_hline(yintercept=rev(flat$s.vel)[1], color = "red", linetype="dashed")+
-    #geom_hline(yintercept=(rev(flat$s.vel)[1]+bd),linetype="dashed",color = "blue")+
-    #geom_hline(yintercept=(rev(flat$s.vel)[1]-bd),linetype="dashed",color = "blue")+
+    ylim(low=0, high =8)+
+    geom_hline(yintercept=rev(df$s.vel)[1], color = "red", linetype="dashed")+
+    #geom_hline(yintercept=(rev(df$s.vel)[1]+bd),linetype="dashed",color = "blue")+
+    #geom_hline(yintercept=(rev(df$s.vel)[1]-bd),linetype="dashed",color = "blue")+
     labs(y="Speed (km/h)",title=paste("Speed Plot:", 
-                                      gen_mark, ", Age Group", flat$age, ", ID:", 
-                                      flat$personid,  sep=" "))
+                                      gen_mark, ", Age Group", df$age, ", ID:", 
+                                      df$personid,  sep=" "))
 }
-drawTrends(df)
+
+
+drawTrends(df.new102)
 
 
 

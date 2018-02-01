@@ -36,7 +36,7 @@ d1<-d1_one[c(1,4:6)]
 colnames(d1)<-c("db_key","time","lat","lon")
 # sort the data set by time
 d1<-d1[order(d1$time),]     # or attach(d1); d1<-d1[order(time),]
-
+load("twenty.Rda")
 
 genDist<-function(raw){
   raw<-raw[order(raw$time),]
@@ -58,8 +58,13 @@ genDist<-function(raw){
   }
   raw
 }
+
+
+
 # Generate data
 # p.xxx <- genDist(raw=personxxx)
+
+
 #############################################
 # replicate this method on another person
 ###############################################################################
