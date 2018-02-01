@@ -7,19 +7,35 @@
 # Func 3 is a seasonality plot of velocity (weekday vs weekend)
 #================================================================================
 # Load Libraries and Data
-load("twelve.Rda")
+load("sup.Rda")
+
 library(ggplot2)
 
 # Func 1: This function extract data into flat dataset
+# length(lis)
+dflist<-ls(pattern="p.*")[1:182]
+
 setUpWeek <- function(person){
   test = person@data
   test$wkdy = weekdays(as.Date(test$time))
   test$week = ceiling(test$sum.t/168)
+  test$s.vel = test$sum.dists/test$sum.t
   test
 }
 
-# Load Data
-df = setUpWeek(p.5939)
+for (i in 1:length(dflist)){
+  name.df=NULL
+  name.df[i]=dflist[i]
+  df<-setUpWeek(person=get(name.df[i]))
+  df$mark[df$wkdy=="Sunday"|df$wkdy=="Saturday"]<- "Weekend"
+  df$mark[df$wkdy=="Monday"|df$wkdy=="Tuesday"|df$wkdy=="Wednesday" |df$wkdy=="Thursday"|df$wkdy=="Friday"] <- "Weekday"
+  assign(paste0("df",i),df)
+}
+
+
+
+
+
 
 # Func 2: This draws the velocity, both weekly and cumulatively
 drawTrends <- function(flat){
@@ -60,6 +76,58 @@ drawTrends <- function(flat){
                                       flat$personid,  sep=" "))
 }
 drawTrends(df)
+
+
+
+# Func 4: Generate Frequencies
+
+getFreq <- function(df){
+  a<-as.data.frame(table(df$week,df$mark))
+  a$id=df$personid[1]
+  a$gen=df$gen[1]
+  a$age=df$age[1]
+  a
+}
+
+idlist<-ls(pattern="df*")[2:183]
+for (i in 1:length(idlist)){
+  temp.df=NULL
+  temp.df[i]=idlist[i]
+  freq<-getFreq(df=get(temp.df[i]))
+  assign(paste0("freq",i),freq)
+}
+
+## Finally, let's just combine them together 
+
+freqlist<-ls(pattern="freq*")[2:183]
+freq<-get(freqlist[1])
+for (i in 2:length(freqlist)){
+  freq<-rbind(freq,get(freqlist[i]))
+  freq
+}
+
+
+w<-density(0.28*freq$Freq)
+plot(w)
+d<-density(0.4*(freq[which(freq$Var2=='Weekday'),]$Freq))
+k<-density(freq[which(freq$Var2=='Weekend'),]$Freq)
+plot(k,col="red",main="Observations per Week")
+lines(w,col="blue")
+lines(d)
+legend("topright", inset=.05, title="Distribution",
+       c("Weekend Only","Overall","Weekday"), col=c("red","blue","black"),
+       horiz=FALSE,lty=1)
+
+## Barplots of Distributions
+library("scales")
+pts=c(-1,0,20,50,100,500,2000,15000)
+xx<-barplot(table(cut(freq$Freq,pts)),
+            names=c("0","(0,20]","(20,50]","(50,100]","(100,500]","(500,2000]","2000+"),
+            xlab="count",ylab="Frequency", ylim=c(0,7000),main="Number of Observations Per Week")
+## Add text at top of bars
+text(x = xx, y = t$Freq, label = t$perc, pos = 3, cex = 0.8, col = "red")
+
+
 
 ### Func 3: Weekday Seasonality Plot (A bit less rough, update 12/11)
 WeekPlot <-function(daf){
