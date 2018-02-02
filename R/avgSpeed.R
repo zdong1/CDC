@@ -1,13 +1,13 @@
 #================================================================================
 # Seasonality and Velocity Summary Plot
 # Author: Zhihang Dong
-# Last Update: 12/11/2017
+# Last Update: 2/2/2018
 # Run Function 1, then Run Func 2 or 3, or both.
 # Func 2 is a summary plot of velocity
 # Func 3 is a seasonality plot of velocity (weekday vs weekend)
 #================================================================================
 # Load Libraries and Data
-load("sup.Rda")
+load("final.RData")
 
 library(ggplot2)
 
@@ -68,13 +68,9 @@ shrink <- function(df){
   df$s.vel<-df$sum.dists/df$sum.t
   df
 }
-
-
-df.new100<-shrink(df100)
-df.new160<-shrink(df160)
-
 # Func 2: This draws the velocity, both weekly and cumulatively
 drawTrends <- function(df){
+  df$week = ceiling(df$sum.t/168)
   gen_mark = NULL
   if (is.na(df$gen[1])) {
     gen_mark = "Unknown"
@@ -100,15 +96,17 @@ drawTrends <- function(df){
     geom_line(data=sp,aes(week,v2),col="darkgreen",lwd=0.8)+
     ylim(low=0, high =8)+
     geom_hline(yintercept=rev(df$s.vel)[1], color = "red", linetype="dashed")+
-    #geom_hline(yintercept=(rev(df$s.vel)[1]+bd),linetype="dashed",color = "blue")+
-    #geom_hline(yintercept=(rev(df$s.vel)[1]-bd),linetype="dashed",color = "blue")+
+    geom_hline(yintercept=(rev(df$s.vel)[1]*1.1),linetype="dashed",color = "blue")+
+    geom_hline(yintercept=(rev(df$s.vel)[1]*0.9),linetype="dashed",color = "blue")+
     labs(y="Speed (km/h)",title=paste("Speed Plot:", 
                                       gen_mark, ", Age Group", df$age, ", ID:", 
                                       df$personid,  sep=" "))
 }
 
 
-drawTrends(df.new102)
+
+drawTrends(df.new162)
+
 
 
 
