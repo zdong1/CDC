@@ -8,13 +8,11 @@
 #================================================================================
 # Load Libraries and Data
 load("final.RData")
-
 library(ggplot2)
 
 # Func 1: This function extract data into flat dataset
 # length(lis)
 dflist<-ls(pattern="p.*")[1:182]
-
 setUpWeek <- function(person){
   test = person@data
   test$wkdy = weekdays(as.Date(test$time))
@@ -22,7 +20,6 @@ setUpWeek <- function(person){
   test$s.vel = test$sum.dists/test$sum.t
   test
 }
-
 for (i in 1:length(dflist)){
   name.df=NULL
   name.df[i]=dflist[i]
@@ -32,15 +29,9 @@ for (i in 1:length(dflist)){
   assign(paste0("df",i),df)
 }
 
-
-
-
-
 #########################################################
 # return to functions
 #########################################################
-
-
 shrink <- function(df){
   class(df$time)=c('POSIXt','POSIXct')
   for (j in 1: nrow(df)){
@@ -102,15 +93,11 @@ drawTrends <- function(df){
                                       gen_mark, ", Age Group", df$age, ", ID:", 
                                       df$personid,  sep=" "))
 }
+drawTrends(df.new140)
 
-
-
-drawTrends(df.new162)
-
-
-
-
+#########################################################
 # Func 4: Generate Frequencies
+#########################################################
 
 getFreq <- function(df){
   a<-as.data.frame(table(df$week,df$mark))
@@ -129,7 +116,6 @@ for (i in 1:length(idlist)){
 }
 
 ## Finally, let's just combine them together 
-
 freqlist<-ls(pattern="freq*")[2:183]
 freq<-get(freqlist[1])
 for (i in 2:length(freqlist)){
@@ -148,7 +134,6 @@ lines(d)
 legend("topright", inset=.05, title="Distribution",
        c("Weekend Only","Overall","Weekday"), col=c("red","blue","black"),
        horiz=FALSE,lty=1)
-
 ## Barplots of Distributions
 library("scales")
 pts=c(-1,0,20,50,100,500,2000,15000)
@@ -157,9 +142,6 @@ xx<-barplot(table(cut(freq$Freq,pts)),
             xlab="count",ylab="Frequency", ylim=c(0,7000),main="Number of Observations Per Week")
 ## Add text at top of bars
 text(x = xx, y = t$Freq, label = t$perc, pos = 3, cex = 0.8, col = "red")
-
-
-
 ### Func 3: Weekday Seasonality Plot (A bit less rough, update 12/11)
 WeekPlot <-function(daf){
   days1 = days2 = days3 = days4 = days5 = days6 = days7 = NULL
