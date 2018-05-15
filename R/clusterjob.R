@@ -38,11 +38,9 @@ shrink <- function(df){
 
 df.new67<-shrink(df67)
 df.new68<-shrink(df68)
-df.new69<-shrink(df69)
-df.new70<-shrink(df70)
-df.new71<-shrink(df71)
 
-save(df.new67,df.new68,df.new69,df.new70,df.new71,
-     file = "temp.RData")
+save(df.new67,df.new68,file = "temp.RData")
 
-
+# Always stop your cluster and exit MPI to ensure resources are properly freed
+stopCluster(cluster)
+mpi.exit()

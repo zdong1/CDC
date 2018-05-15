@@ -93,7 +93,7 @@ drawTrends <- function(df){
                                       gen_mark, ", Age Group", df$age, ", ID:", 
                                       df$personid,  sep=" "))
 }
-drawTrends(df.new140)
+drawTrends(df.new114)
 
 #########################################################
 # Func 4: Generate Frequencies
