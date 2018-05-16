@@ -22,9 +22,12 @@ numeric_weekday<-function(daf){
   daf[which(daf$wkdy=="Sunday"),]$wkdy = 7
   daf
 }
-newweek<-function(daf){
+# mini is the minimum gap time you want to set up for your bootstrap simul.
+# maxi is the maximum gap time. Raise mini for a faster algorithm, decrease maxi for
+# higher accuracy
+newweek<-function(daf,mini,maxi){
   temp_df<-daf[c(1:3,6:9,12,14)]
-  temp_df<-temp_df[which(temp_df$t.delta>0.03 & temp_df$t.delta<2),]
+  temp_df<-temp_df[which(temp_df$t.delta>mini & temp_df$t.delta<maxi),]
   # Give each weekname an assigned number, use the shrink version of dataset
   i = 1
   day.w<-NULL
@@ -76,7 +79,7 @@ weeks_p30 <- rbindlist(weeks)
 bt105<-bsCalc(weeks_p30)
 
 
-# Get the Plot
+# Get the Plot, this is pretty raw at this point.
 plot(bt105$sum.t,bt105$s.vel, type="l",xlab="Cumulative Time",ylab="Cumulative Velocity",
      lwd=1.2,col="brown",main="Bootstrapped Person Speed Plot")
 # TODO: Replicate this to hours
