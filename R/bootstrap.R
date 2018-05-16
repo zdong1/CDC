@@ -12,16 +12,33 @@ library(ggmap)
 # @Func[newweek]: bootstrap and generate a newweek (you need to replicate it)
 # @Func[bsCalc]: recalculate a bootstrapped week
 # ============================================================================
+
 numeric_weekday<-function(daf){
-  daf[which(daf$wkdy=="Monday"),]$wkdy = 1
-  daf[which(daf$wkdy=="Tuesday"),]$wkdy = 2
-  daf[which(daf$wkdy=="Wednesday"),]$wkdy = 3
-  daf[which(daf$wkdy=="Thursday"),]$wkdy = 4
-  daf[which(daf$wkdy=="Friday"),]$wkdy = 5
-  daf[which(daf$wkdy=="Saturday"),]$wkdy = 6
-  daf[which(daf$wkdy=="Sunday"),]$wkdy = 7
+  # @throw: many small data has 0 for a particular DOW, give them a skip when so. 
+  if (nrow(daf[which(daf$wkdy=="Monday"),])>0){
+    daf[which(daf$wkdy=="Monday"),]$wkdy = 1
+  }
+  if (nrow(daf[which(daf$wkdy=="Tuesday"),])>0){
+    daf[which(daf$wkdy=="Tuesday"),]$wkdy = 2 
+  }
+  if (nrow(daf[which(daf$wkdy=="Wednesday"),])>0){
+    daf[which(daf$wkdy=="Wednesday"),]$wkdy = 3
+  }
+  if (nrow(daf[which(daf$wkdy=="Thursday"),])>0){
+    daf[which(daf$wkdy=="Thursday"),]$wkdy = 4
+  }
+  if (nrow(daf[which(daf$wkdy=="Friday"),])>0){
+    daf[which(daf$wkdy=="Friday"),]$wkdy = 5
+  }
+  if (nrow(daf[which(daf$wkdy=="Saturday"),])>0){
+    daf[which(daf$wkdy=="Saturday"),]$wkdy = 6
+  }
+  if (nrow(daf[which(daf$wkdy=="Sunday"),])>0){
+    daf[which(daf$wkdy=="Sunday"),]$wkdy = 7 
+  }
   daf
 }
+
 # mini is the minimum gap time you want to set up for your bootstrap simul.
 # maxi is the maximum gap time. Raise mini for a faster algorithm, decrease maxi for
 # higher accuracy
@@ -71,7 +88,9 @@ bsCalc <-function(df){
 # ============================================================================
 
 # First, you must enumerate weekdays
-daf30<-numeric_weekday(df.new30)
+
+
+
 # This function generates a new week of a person x many times
 weeks <- replicate(20,newweek(daf30),simplify=FALSE)
 weeks_p30 <- rbindlist(weeks)
