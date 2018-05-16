@@ -59,6 +59,7 @@ shrink <- function(df){
   df$s.vel<-df$sum.dists/df$sum.t
   df
 }
+
 # Func 2: This draws the velocity, both weekly and cumulatively
 drawTrends <- function(df){
   df$week = ceiling(df$sum.t/168)

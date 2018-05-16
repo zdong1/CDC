@@ -1,9 +1,9 @@
 library(boot)
 library(data.table)
 
-
-# Set up the weekday of a week
-bsetup <- function(daf){
+# This function generates a new week of a person
+newweek<-function(daf){
+  # Give each weekname an assigned number, use the shrink version of dataset
   daf[which(daf$wkdy=="Monday"),]$wkdy = 1
   daf[which(daf$wkdy=="Tuesday"),]$wkdy = 2
   daf[which(daf$wkdy=="Wednesday"),]$wkdy = 3
@@ -11,20 +11,14 @@ bsetup <- function(daf){
   daf[which(daf$wkdy=="Friday"),]$wkdy = 5
   daf[which(daf$wkdy=="Saturday"),]$wkdy = 6
   daf[which(daf$wkdy=="Sunday"),]$wkdy = 7
-  daf[c(1:3,6:9,12:13)]
-}
-
-# Generate a dataset ready for bootstrap
-df.bs105<-bsetup(df.new105)
-
-# This function generates a new week of a person
-newweek<-function(df.bs105){
+  temp_df<-daf[c(1:3,6:9,12:13)]
   i = 1
   day.w<-NULL
   while (i < 8){
-    day.p <- df.bs105[which(df.bs105$wkdy==i),]
+    day.p <- temp_df[which(temp_df$wkdy==i),] # permutate a Mon/Tues/Weds...
     day<-day.p[sample(nrow(day.p),1,replace = TRUE),]
     j = 1
+    # Given a day, sample with replacement of a particular move until 24 hours are filled
     while (j > 0){
       day.s<-day.p[sample(nrow(day.p),1,replace = TRUE),]
       day<- rbind(day.s,day)
@@ -44,7 +38,8 @@ newweek<-function(df.bs105){
   day.w
 }
 
-weeks <- replicate(20,newweek(df.bs105),simplify=FALSE)
+
+weeks <- replicate(20,newweek(df.new15),simplify=FALSE)
 weeks <- rbindlist(weeks)
 
 
