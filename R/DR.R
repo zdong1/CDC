@@ -105,21 +105,21 @@ DR = function(data, h, kernel="Gaussian",
   
   ### mass-volume and Betti number curves (remove)
   # D_top_curve = rep(NA, n_tg)
-  # D_area_curve = rep(NA, n_tg)
-  # for(i in 1:n_tg){
-  #  al = al_seq[i]
-  #  if(sum(gr0_alpha>=al)==1){
-  #    D_area_curve[i] = 1/nrow(gr0) 
-  #  }
-  #  if(sum(gr0_alpha>=al)>1){
-  #    D_area_curve[i] = sum(gr0_alpha>=al)/nrow(gr0) 
-  #  }
+   D_area_curve = rep(NA, n_tg)
+   for(i in 1:n_tg){
+    al = al_seq[i]
+    if(sum(gr0_alpha>=al)==1){
+      D_area_curve[i] = 1/nrow(gr0) 
+    }
+    if(sum(gr0_alpha>=al)>1){
+      D_area_curve[i] = sum(gr0_alpha>=al)/nrow(gr0) 
+    }
   #  if(length(D_cc)==2){
   #    D_top_curve[i] = sum(D_cc[2]>al) - sum(D_cc[1]>al)
   #  }else{
   #    D_top_curve[i] = sum(D_cc[,2]>al) - sum(D_cc[,1]>al)
   #  }
-  # }
+   }
   
   ### Output
   out_put = list()
@@ -131,8 +131,8 @@ DR = function(data, h, kernel="Gaussian",
   out_put$CL_lev = CL_lev
   out_put$CL = CL
   # out_put$persistent = D_top$diagram
-  # out_put$clevel = al_seq
-  # out_put$Mcurve = D_area_curve
+  out_put$clevel = al_seq
+  out_put$Mcurve = D_area_curve
   # out_put$Bcurve = D_top_curve
   # out_put$Pcurve = P0_step
   return(out_put)
