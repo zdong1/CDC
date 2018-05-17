@@ -91,23 +91,19 @@ bsCalc <-function(df){
   df
 }
 # ============================================================================
-
+# Examples
 # First, you must enumerate weekdays
-
-
-wk<-newweek(daf3)
-
-# This function generates a new week of a person x many times
-weeks <- replicate(20,newweek(daf3),simplify=FALSE)
-wk3 <- rbindlist(weeks)
-week<-newweek(daaf33)
-# Calculate the Cumulative Speed Over Time for a newly generated week
-bt105<-bsCalc(weeks_p30)
+# wk<-newweek(daf3)
+# Then, use function 2 to generate a new week of a person 20 times
+# weeks <- replicate(20,newweek(daf3),simplify=FALSE)
+# new.week <- rbindlist(weeks)
+# Finally, calculate the Cumulative Speed Over Time for a newly generated week
+# bt104<-bsCalc(weeks_p30)
 
 
 # Get the Plot, this is pretty raw at this point.
-plot(bt104$sum.t,bt104$s.vel, type="l",xlab="Cumulative Time",ylab="Cumulative Velocity",
-     lwd=1.2,col="brown",main="Bootstrapped Person Speed Plot")
+# plot(bt104$sum.t,bt104$s.vel, type="l",xlab="Cumulative Time",ylab="Cumulative Velocity",
+#     lwd=1.2,col="brown",main="Bootstrapped Person Speed Plot")
 # TODO: Replicate this to hours
 # TODO: Refine the plot (5/16)
 
