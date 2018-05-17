@@ -1,4 +1,5 @@
 #### GPS/mutli-scale/stratified space analysis tool
+# (5/17): Updated for larger dataset
 #### Author: Yen-Chi Chen <yenchic@uw.edu>
 #### Reference: 
 ####    1. Chen, Yen-Chi, Adrian Dobra. "Measuring Human Activity Spaces With 
