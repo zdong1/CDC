@@ -5,7 +5,7 @@
 # ===========================================================================
 # load("finalized_a1.Rda")
 # Shapiro-Wilk Normality Test
-with(lct1, shapiro.test(lct[gender== "Female"]))
+with(lct, shapiro.test(lct[gender== "Female"]))
 # Results were frightening... let's do a log transformation
 lct1<-lct
 lct1$lct<-log(lct$lct)
