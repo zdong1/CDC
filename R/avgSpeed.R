@@ -59,6 +59,10 @@ shrink <- function(df){
   df$s.vel<-df$sum.dists/df$sum.t
   df
 }
+
+df.new6194<-setUpWeek(p.6194)
+df.new6194<-shrink(df.new6194)
+
 # Func 2: This draws the velocity, both weekly and cumulatively
 drawTrends <- function(df){
   df$week = ceiling(df$sum.t/168)
@@ -83,17 +87,16 @@ drawTrends <- function(df){
   # bd = 1.96*sd(sp$v1,na.rm=TRUE)/sqrt(nrow(sp)) #band necessary?
   f  = ggplot(sp,aes(week,v1))
   f  + geom_point(col="deepskyblue", cex=2, pch=18)+
-    geom_smooth(model=loess,col="firebrick",lwd= 0.6)+
     geom_line(data=sp,aes(week,v2),col="darkgreen",lwd=0.8)+
-    ylim(low=0, high =8)+
+    ylim(low=0, high =4)+
     geom_hline(yintercept=rev(df$s.vel)[1], color = "red", linetype="dashed")+
     geom_hline(yintercept=(rev(df$s.vel)[1]*1.1),linetype="dashed",color = "blue")+
     geom_hline(yintercept=(rev(df$s.vel)[1]*0.9),linetype="dashed",color = "blue")+
-    labs(y="Speed (km/h)",title=paste("Speed Plot:", 
-                                      gen_mark, ", Age Group", df$age, ", ID:", 
+    theme_light()+
+    labs(y="Speed (km/h)",title=paste("ID:", 
                                       df$personid,  sep=" "))
 }
-drawTrends(df.new114)
+drawTrends(df.new619)
 
 #########################################################
 # Func 4: Generate Frequencies
