@@ -10,7 +10,7 @@ library(devtools)
 library(ggmap)
 library(ggplot2)
 
-register_google(key = "AIzaSyCjGm_QhAOizT4Hy5gL6OWVvH6ehw9Rp74")
+register_google(key = "Your API Key")
 lausanne <- get_map("lausanne", zoom = 14)
 
 LausanneMap <- ggmap("lausanne", extent = "device", legend = "topleft")
