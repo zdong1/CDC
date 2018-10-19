@@ -1,6 +1,12 @@
+#================================================================================
+# Generate Anchor Locations using ggmap
+# Author: Zhihang Dong
+# Last Update: 10/18/2018
+#================================================================================
+
 library(devtools)
-if(!requireNamespace("devtools")) install.packages("devtools")
-devtools::install_github("dkahle/ggmap", ref = "tidyup")
+# if(!requireNamespace("devtools")) install.packages("devtools")
+# devtools::install_github("dkahle/ggmap", ref = "tidyup")
 library(ggmap)
 library(ggplot2)
 
