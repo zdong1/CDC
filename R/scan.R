@@ -1,9 +1,3 @@
-####################################################################
-# Scan Test for GPS Records on a Flat Region
-# Zhihang Dong
-# Version 0.1
-# 11/1/2018
-#####################################################################
 library(sp)
 library(sf)
 library(rgdal)
@@ -54,6 +48,16 @@ plot(spdf, col='red', add =TRUE, cex = 0.05, pch = 1)
 res<-over(spdf,quads)
 table(res)
 
+# Extracts Data from sp Polygon and coerce them into a dataframe
+df <- data.frame(matrix(ncol = 5, nrow = length(quads)))
+x <- c("id", "lon", "lat", "case", "pop")
+colnames(df) <- x
+for (i in 1:length(quads)){
+  df$id[i]<-quads@polygons[[i]]@ID
+  df$lon[i]<-quads@polygons[[i]]@labpt[1]
+  df$lat[i]<-quads@polygons[[i]]@labpt[2]
+}
+
 # Sat-Scan Test
 out = flex.test(coords = xy, cases = floor(nydf$cases),
                 w = nyw, k = 3,  
@@ -61,3 +65,4 @@ out = flex.test(coords = xy, cases = floor(nydf$cases),
                 alpha = 0.12, lonlat = TRUE)
 
 write.csv(grid, file="grid.csv")
+
