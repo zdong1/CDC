@@ -1,9 +1,20 @@
+#================================================================================
+# Spatial scan statistic replicating Tango et al. (2005) paper
+# Author: Zhihang Dong
+# Last Update: 11/1/2018
+#================================================================================
+
+# Load required packages
+
 library(sp)
 library(sf)
 library(rgdal)
 library(raster)
 library(GISTools)
 library(raster)
+library(spdep)
+library(plyr)
+library(ggplot2)
 
 sw <- getData('GADM', country = 'CHE', level = 1)
 sw$NAME_1
@@ -46,23 +57,45 @@ plot(spdf, col='red', add =TRUE, cex = 0.05, pch = 1)
 
 # Count how many GPS records are in each polygon
 res<-over(spdf,quads)
-table(res)
+tab<-table(res)
+qid<-NULL
+case<-NULL
+for (j in 1:length(tab)){
+  qid[j]<-names(tab[j])
+  case [j]<-tab[j]
+}
+record<-data.frame(qid,case)
 
 # Extracts Data from sp Polygon and coerce them into a dataframe
-df <- data.frame(matrix(ncol = 5, nrow = length(quads)))
-x <- c("id", "lon", "lat", "case", "pop")
+df <- data.frame(matrix(ncol = 4, nrow = length(quads)))
+x <- c("id", "longitude", "latitude", "pop")
 colnames(df) <- x
 for (i in 1:length(quads)){
   df$id[i]<-quads@polygons[[i]]@ID
   df$lon[i]<-quads@polygons[[i]]@labpt[1]
   df$lat[i]<-quads@polygons[[i]]@labpt[2]
+  df$pop[i]<-sum(tab)/length(quads)
 }
 
+# merge two tables with left join on df
+final<-merge(x=df, y=record, by.x=c('id'), by.y=c('qid'), all.x=TRUE)
+
+final[is.na(final)] <- 0
+head(final)
+
+xy = data.frame(final[2], final[3])
+head(xy)
+
+# Create adjacency matrix for the polygons you created.
+nb <- poly2nb(quads)
+mat<-nb2mat(nb)
+
 # Sat-Scan Test
-out = flex.test(coords = xy, cases = floor(nydf$cases),
-                w = nyw, k = 3,  
-                pop = nydf$pop, nsim = 49, 
-                alpha = 0.12, lonlat = TRUE)
+# check different parameters: coords, cases (floor are optional)
+out = flex.test(coords = xy, cases = floor(final$case), w = mat,
+                k = 8, pop = df$pop, nsim = 49, alpha = 0.12, lonlat = TRUE)
+# ex is not required since we are dealing with GPS data
 
-write.csv(grid, file="grid.csv")
+#write to file(optional)
 
+#write.csv(out, file="flex_outcome.txt")
