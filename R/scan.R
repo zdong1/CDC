@@ -72,8 +72,8 @@ x <- c("id", "longitude", "latitude", "pop")
 colnames(df) <- x
 for (i in 1:length(quads)){
   df$id[i]<-quads@polygons[[i]]@ID
-  df$lon[i]<-quads@polygons[[i]]@labpt[1]
-  df$lat[i]<-quads@polygons[[i]]@labpt[2]
+  df$longitude[i]<-quads@polygons[[i]]@labpt[1]
+  df$latitude[i]<-quads@polygons[[i]]@labpt[2]
   df$pop[i]<-sum(tab)/length(quads)
 }
 
@@ -93,7 +93,10 @@ mat<-nb2mat(nb)
 # Sat-Scan Test
 # check different parameters: coords, cases (floor are optional)
 out = flex.test(coords = xy, cases = floor(final$case), w = mat,
-                k = 8, pop = df$pop, nsim = 49, alpha = 0.12, lonlat = TRUE)
+                k = 4, pop = df$pop, nsim = 49, alpha = 0.12, lonlat = TRUE)
+
+# Plot the clusters
+plot(quads, col = color.clusters(out))
 # ex is not required since we are dealing with GPS data
 
 #write to file(optional)
