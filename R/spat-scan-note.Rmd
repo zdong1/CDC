@@ -1,0 +1,254 @@
+---
+title: "Spatial Scan Statistics"
+output:
+  html_notebook: default
+  html: default
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+## 1. Load Required Packages
+
+```{r}
+library(sp)
+library(sf)
+library(rgdal)
+library(raster)
+library(GISTools)
+library(raster)
+library(spdep)
+library(plyr)
+library(ggplot2)
+library(rsatscan)
+library(smerc)
+```
+
+## 2. Get Required Spatial Files
+
+Here, we generate a map for the region of Vaud in Switzerland, which contains most of our GPS location observations.
+
+```{r}
+switz <- getData('GADM', country = 'CHE', level = 1)
+switz$NAME_1
+vaud <- switz[switz$NAME_1 == "Vaud",]
+```
+
+We then check the CRS to make sure the map unit we are using. By default, package *sp* uses (proj='longlat' +datum=WGS84 +no_defs +ellps=WGS84 +towgs84=0,0,0). 
+
+```{r}
+# check the CRS to know which map units are used
+proj4string(vaud)
+# Create a grid of points within the bbox of the SpatialPolygonsDataFrame 
+# colorado with decimal degrees as map units
+grid <- makegrid(vaud, cellsize = 0.05) # cellsize in map units!
+xy <- person6192[c(5,6)]
+geodf <- SpatialPointsDataFrame(coords = xy, data = xy, proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 + towgs84=0,0,0"))
+proj4string(vaud) == proj4string(geodf)
+```
+
+For this case, we want to use another projection (UTM) that conserves distance on mapping. We use UTM.
+
+```{r}
+vaud_m <- spTransform(vaud,CRS("+proj=utm +zone=32 +datum=WGS84"))
+gps <-spTransform(geodf, CRS("+proj=utm +zone=32 +datum=WGS84"))
+
+proj4string(vaud_m)
+proj4string(gps)
+
+{plot(vaud_m) 
+plot(gps, col='red', add = T, cex = 0.05, pch = 1)}
+```
+
+
+We use the expand.grid to cut the grids.
+
+```{r}
+# project grids and points, find projections and rasterize the entire region by 4000 unit of easting/northing
+x<- seq(from = 284374.8, to = 365936.1, by = 4000)
+y<- seq(from = 5165759.3, to = 5117012.8, by = -4000)
+
+xy<-expand.grid(x=x, y=y)
+
+# Project points to spdf format
+grid.pts<-SpatialPointsDataFrame(coords= xy, data=xy, proj4string = CRS("+proj=utm +zone=32 +datum=WGS84"))
+gridded(grid.pts)<-TRUE
+grid <- as(grid.pts, "SpatialPolygons")
+
+
+gridspdf <- SpatialPolygonsDataFrame(grid, data=data.frame(id=row.names(grid), 
+   row.names=row.names(grid)))
+for (i in 1:length(gridspdf)){
+  grid@polygons[[i]]@ID<-substring(grid@polygons[[i]]@ID, 2)
+}
+for (i in 1:length(gridspdf)){
+  gridspdf@polygons[[i]]@ID<-substring(gridspdf@polygons[[i]]@ID, 2)
+}
+
+{plot(grid)
+text(coordinates(grid), labels=sapply(slot(grid, "polygons"), function(i) slot(i, 
+   "ID")), cex=0.3)}
+
+# Form the adjacency graph and take the subgraph corresponding to the grid cells that have GPS locations
+# find the largest connected component of the graph>
+
+
+
+# Plot GPS Records on a (flat) spatial polygon
+{plot(grid)
+plot(gps, col='blue', add =TRUE, cex = 0.05, pch = 1)}
+```
+
+
+Then, we want to count how many GPS records are in each cell (polygon). We merge them in the table, where for each cell $i$, we have the observed GPS count $c_i$ as case. By default, we use a random number $\mathbb{R}$ as the population.
+
+```{r}
+# Count how many GPS records are in each polygon
+res<-over(gps,grid)
+tab<-table(res)
+qid<-NULL
+case<-NULL
+for (j in 1:length(tab)){
+  qid[j]<-names(tab[j])
+  case [j]<-tab[j]
+}
+record<-data.frame(qid,case)
+
+# Extracts Data from sp Polygon and coerce them into a dataframe
+df <- data.frame(matrix(ncol = 4, nrow = length(grid)))
+var <- c("id", "easting", "northing", "pop")
+colnames(df) <- var
+for (i in 1:length(grid)){
+  df$id[i]<-as.numeric(gridspdf@polygons[[i]]@ID)
+  df$easting[i]<-grid@polygons[[i]]@labpt[1]
+  df$northing[i]<-grid@polygons[[i]]@labpt[2]
+  df$pop[i]<-sum(tab)/length(grid)
+}
+
+# merge two tables with left join on df
+final<-merge(x=df, y=record, by.x=c('id'), by.y=c('qid'), all.x=TRUE)
+
+final[is.na(final)] <- 0
+head(final)
+```
+
+The required format of the matrix file for flex.scan test is a matrix, so we create the neighborhood file by function *poly2nb* and *nb2mat*.
+
+```{r}
+xy = data.frame(final[2], final[3])
+head(xy)
+
+# Create adjacency matrix for the polygons you created.
+nb <- poly2nb(grid, queen = FALSE) # DO both in queen option
+mat<-nb2mat(nb)
+```
+
+
+We set the expected number of observations to be 0 (?). Lastly, for the flex.test to run, we must obtain the centroids of each grid cell. We did so by function **gCentroid**.
+
+
+```{r}
+final$exp = 0
+trueCentroids = gCentroid(grid,byid=TRUE)
+cent<-trueCentroids@coords
+```
+
+
+## 3. Flexible Scan Statistics 
+
+We applied the flexible scan statistics here. The problem of alignment seems persists.
+
+```{r}
+# Sat-Scan Test
+# check different parameters: coords, cases (floor are optional)
+out = flex.test(coords = cent, cases = final$case, w = mat, ex = final$pop, k = 10,
+               pop = final$pop, nsim = 200, alpha = 0.005, lonlat =FALSE)
+
+
+# Plot the clusters
+# plots and find regions of interests
+
+{plot(grid, col = color.clusters(out))
+ plot(gps, col='red', add =TRUE, cex = 0.05, pch = 1)}
+```
+
+
+## 4. Plotting
+
+```{r}
+quadframe <-SpatialPolygonsDataFrame(grid,data=as.data.frame(final))
+manual.col = colorRampPalette(c("#f7f6fd","#4635d0"))
+color.match = manual.col(length(unique(quadframe@data$case)))
+lookupTable = sort(unique(quadframe@data$case))
+quadframe$color = color.match[match(quadframe@data$case, lookupTable)]
+{par(mfrow=c(1,2))
+plot(quadframe, col=quadframe$color, border="light gray", lwd=0.5, main = 'Grid-Based Observation Count', axes= TRUE)
+plot(gridspdf, border='light gray', main = 'Raw GPS Points Observation', axes=TRUE)
+plot(gps, col='pink', add =TRUE, cex = 0.05, pch = 1)}
+```
+
+
+##5. Return $k$ most likely clusters using Kulldorff method
+
+```{r}
+library(SpatialEpi)
+n.simulations <- 999
+alpha.level <- 0.05
+# Kpoisson <- kulldorff(geo = cent, cases = final$cases, population = final$pop ,expected.cases= final$exp, pop.upper.bound, n.simulations, alpha.level, plot=T)
+# Kcluster <- Kpoisson$most.likely.cluster$location.IDs.included
+```
+
+
+
+## Version 2: poly2nb with queen option = TRUE
+
+The required format of the matrix file for flex.scan test is a matrix, so we create the neighborhood file by function *poly2nb* and *nb2mat*.
+
+```{r}
+xy = data.frame(final[2], final[3])
+head(xy)
+
+# Create adjacency matrix for the polygons you created.
+nb2 <- poly2nb(grid, queen = TRUE) # DO both in queen option
+mat2<-nb2mat(nb2)
+```
+
+Same Setting
+
+```{r}
+# Sat-Scan Test
+# check different parameters: coords, cases (floor are optional)
+out = flex.test(coords = cent, cases = final$case, w = mat2, ex = final$pop, k = 10,
+               pop = final$pop, nsim = 200, alpha = 0.005, lonlat =FALSE)
+
+
+# Plot the clusters
+# plots and find regions of interests
+
+{plot(grid, col = color.clusters(out))
+ plot(gps, col='red', add =TRUE, cex = 0.05, pch = 1)}
+```
+
+
+## Version 3: Another Version of Centroid (lower right)
+```{r}
+# This will do the trick, as it moves the centroid to the lower right diag.
+cent2<-trueCentroids@coords
+cent2[,1] = cent2[,1] + 2000
+cent2[,2] = cent2[,2] + 2000
+# Sat-Scan Test
+# check different parameters: coords, cases (floor are optional)
+out = flex.test(coords = cent2, cases = final$case, w = mat2, ex = final$pop, k = 10,
+               pop = final$pop, nsim = 200, alpha = 0.005, lonlat =FALSE)
+
+
+# Plot the clusters
+# plots and find regions of interests
+
+{plot(grid, col = color.clusters(out))
+ plot(gps, col='red', add =TRUE, cex = 0.05, pch = 1)}
+```
+
+
+
+Changing centroids won't make any differences in plots.
