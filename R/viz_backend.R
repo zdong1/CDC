@@ -48,8 +48,9 @@ getArea <- function(){
 }
 
 # upto is an indicator of up to which week you want to look at
-getPoint <- function(p, upto, lonColumn = 5, latColumn = 6){
-  p <- p [which(p$week < upto + 1), ]
+getPoint <- function(p, start, end, lonColumn = 5, latColumn = 6){
+  p <- p [which(p$week > start - 1), ]
+  p <- p [which(p$week < end + 1), ]
   xy <- p[c(lonColumn, latColumn)]
   geodf <- SpatialPointsDataFrame(coords = xy, data = xy, proj4string = CRS("+proj=longlat +datum=WGS84 +no_defs +ellps=WGS84 + towgs84=0,0,0"))
   gps <- spTransform(geodf, CRS("+proj=utm +zone=32 +datum=WGS84"))
@@ -109,7 +110,7 @@ gridCount <- function(gridFile, pointFile){
 
 trimCell <- function(leastObs, gridFile, pointFile){
   gridspdf <- SpatialPolygonsDataFrame(gridFile, data=data.frame(id=row.names(gridFile), 
-                                                             row.names=row.names(gridFile)))
+                                                                 row.names=row.names(gridFile)))
   gridspdf@data$obs<-final$case
   testpdf<-subset(gridspdf, obs > leastObs)
   grid2 <- as(testpdf, "SpatialPolygons")
@@ -117,7 +118,7 @@ trimCell <- function(leastObs, gridFile, pointFile){
   for (i in 1:length(grid2)){
     grid2@polygons[[i]]@ID<-as.character(i)
   }
-   grid2
+  grid2
 }
 
 # Must run function gridCount before running flexScan
@@ -161,10 +162,10 @@ flexScan <- function(gridFile, pointFile, nbQueen = TRUE, zeroPolicy = TRUE){
 }
 
 plotGrid <- function(gridFile, pointFile){
-    plot(gridFile)
-    text(coordinates(gridFile), labels=sapply(slot(gridFile, "polygons"), 
-                                              function(i) slot(i,"ID")), cex=0.7)
-    plot(pointFile, col= 'blue', add =TRUE, cex = 0.04, pch = 1)
+  plot(gridFile)
+  text(coordinates(gridFile), labels=sapply(slot(gridFile, "polygons"), 
+                                            function(i) slot(i,"ID")), cex=0.7)
+  plot(pointFile, col= 'blue', add =TRUE, cex = 0.04, pch = 1)
 }
 
 plotDuo <- function(gridFile, pointFile, scanOutput){
@@ -212,7 +213,7 @@ plotDuo <- function(gridFile, pointFile, scanOutput){
 
 person6106<-timestamp(person6106)
 vaud_m = getArea()
-gps = getPoint(person6106, upto = 8) # Key Metric
+gps = getPoint(person6106, start = 0, end = 8) # Key Metric
 grid = drawGrid(4000, 4000) # Secondary Metric
 final = gridCount(grid, gps)
 plotGrid(gridFile = grid2, pointFile = gps)
