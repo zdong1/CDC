@@ -1,5 +1,10 @@
 #####################################################
 # Visualizer Back-End Functions
+# Zhihang Dong
+# Version: 0.0.1. 
+# Date: 11/14/2018
+# Provide all essential functions for R-Shiny Demonstration
+# of clustering patterns over time
 #####################################################
 
 # Load required packages
@@ -162,7 +167,44 @@ plotGrid <- function(gridFile, pointFile){
     plot(pointFile, col= 'blue', add =TRUE, cex = 0.04, pch = 1)
 }
 
-
+plotDuo <- function(gridFile, pointFile, scanOutput){
+  res<-over(pointFile,gridFile)
+  tab<-table(res)
+  qid<-NULL
+  case<-NULL
+  for (j in 1:length(tab)){
+    qid[j]<-names(tab[j])
+    case [j]<-tab[j]
+  }
+  record<-data.frame(qid,case)
+  
+  # Extracts Data from sp Polygon and coerce them into a dataframe
+  df <- data.frame(matrix(ncol = 4, nrow = length(grid2)))
+  var <- c("id", "easting", "northing", "pop")
+  colnames(df) <- var
+  for (i in 1:length(gridFile)){
+    df$id[i]<-as.numeric(gridFile@polygons[[i]]@ID)
+    df$easting[i]<-gridFile@polygons[[i]]@labpt[1]
+    df$northing[i]<-gridFile@polygons[[i]]@labpt[2]
+    df$pop[i]<-sum(tab)/length(grid2)
+  }
+  
+  # merge two tables with left join on df
+  final<-merge(x=df, y=record, by.x=c('id'), by.y=c('qid'), all.x=TRUE)
+  
+  final[is.na(final)] <- 0
+  
+  
+  quadframe <-SpatialPolygonsDataFrame(gridFile,data=as.data.frame(final))
+  manual.col = colorRampPalette(c("#f7f6fd","#4635d0"))
+  color.match = manual.col(length(unique(quadframe@data$case)))
+  lookupTable = sort(unique(quadframe@data$case))
+  quadframe$color = color.match[match(quadframe@data$case, lookupTable)]
+  {par(mfrow=c(1,2))
+    plot(quadframe, col=quadframe$color, border="light gray", lwd=0.5, main = 'Grid-Level Count Map', axes= TRUE)
+    plot(pointFile, col='pink', add =TRUE, cex = 0.05, pch = 1)
+    plot(grid2, col = color.clusters(scanOutput), border="gray", main = "Clustering Results", axes= TRUE)}
+}
 
 ##############################################
 ### Try Me !
@@ -170,11 +212,10 @@ plotGrid <- function(gridFile, pointFile){
 
 person6106<-timestamp(person6106)
 vaud_m = getArea()
-gps = getPoint(person6106, upto = 8)
-grid = drawGrid(4000, 4000)
+gps = getPoint(person6106, upto = 8) # Key Metric
+grid = drawGrid(4000, 4000) # Secondary Metric
 final = gridCount(grid, gps)
 plotGrid(gridFile = grid2, pointFile = gps)
-grid2 = trimCell(10, grid, gps)
+grid2 = trimCell(10, grid, gps) # Third Metric
 out = flexScan(grid2, gps)
-{plot(grid2, col = color.clusters(out))
-  plot(gps, col='pink', add =TRUE, cex = 0.05, pch = 1)}
+plotDuo(grid2, gps, out)
