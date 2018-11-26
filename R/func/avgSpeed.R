@@ -14,13 +14,13 @@ library(ggplot2)
 # Func 1: This function extract data into flat dataset
 # length(lis)
 dflist<-ls(pattern="p.*")[1:182]
-setUpWeek <- function(person){
-  test = person@data
-  test$wkdy = weekdays(as.Date(test$time))
-  test$week = ceiling(test$sum.t/168)
-  test$s.vel = test$sum.dists/test$sum.t
-  test
-}
+# setUpWeek <- function(person){
+#  test = person@data
+#  test$wkdy = weekdays(as.Date(test$time))
+#  test$week = ceiling(test$sum.t/168)
+#  test$s.vel = test$sum.dists/test$sum.t
+#  test
+# }
 for (i in 1:length(dflist)){
   name.df=NULL
   name.df[i]=dflist[i]
@@ -34,38 +34,26 @@ for (i in 1:length(dflist)){
 # return to functions
 #########################################################
 shrink <- function(df){
-  class(df$time)=c('POSIXt','POSIXct')
-  for (j in 1: nrow(df)){
-    if(sum(df$week==df$week[j]) > 100){
-      df$valid[j] = 1
-    } else{
-      df$valid[j] = 0
-    }
-  }
-  df = df[!df$valid == 0,]
-  df$vel[1] = 0
-  df$t.delta[1] = 0
-  df$dists[1] = 0
-  df$t.delta[1]<-0
-  for (i in 2:nrow(df)){
-    df$t.delta[i]<-difftime(df$time[i],df$time[i-1],units="hours")
-  }
-  # try = data.frame(diff(as.matrix(as.numeric(p.6078$time)/3600)))
   df$t.delta[df$t.delta>48] <- 0
   df$dists[df$t.delta>48] <- 0
   df <- within(df, sum.dists <- cumsum(dists))
   df <- within(df, sum.t <- cumsum(t.delta))
   df$vel<- df$dists/df$t.delta
   df$s.vel<-df$sum.dists/df$sum.t
+  df$week = ceiling(df$sum.t/168)
   df
 }
 
 
 lctready <- function(dat){
-  dfm<-setUpWeek(dat)
-  ready<-shrink(dfm)
+  ready<-shrink(dat)
   ready
 }
+
+
+#df.new5977 = lctready(df28)
+#max(df.new5977$week)
+#drawTrends(df.new5977)
 
 # Func 2: This draws the velocity, both weekly and cumulatively
 drawTrends <- function(df){
@@ -92,7 +80,7 @@ drawTrends <- function(df){
   f  = ggplot(sp,aes(week,v1))
   f  + geom_point(col="deepskyblue", cex=2, pch=18)+
     geom_line(data=sp,aes(week,v2),col="darkgreen",lwd=0.8)+
-    ylim(low=0, high =4)+
+    ylim(low=0, high =max(df$s.vel))+
     geom_hline(yintercept=rev(df$s.vel)[1], color = "red", linetype="dashed")+
     geom_hline(yintercept=(rev(df$s.vel)[1]*1.1),linetype="dashed",color = "blue")+
     geom_hline(yintercept=(rev(df$s.vel)[1]*0.9),linetype="dashed",color = "blue")+
@@ -101,7 +89,7 @@ drawTrends <- function(df){
     labs(y="Speed (km/h)", x = "Week", title=paste("ID:", 
                                       df$personid,  sep=" "))
 }
-drawTrends(df.new6168)
+drawTrends(df.new5957)
 
 #########################################################
 # Func 4: Generate Frequencies
