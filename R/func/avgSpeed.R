@@ -8,6 +8,7 @@
 #================================================================================
 # Load Libraries and Data
 load("final.RData")
+library(datetime)
 library(ggplot2)
 
 # Func 1: This function extract data into flat dataset
@@ -49,19 +50,22 @@ shrink <- function(df){
   for (i in 2:nrow(df)){
     df$t.delta[i]<-difftime(df$time[i],df$time[i-1],units="hours")
   }
+  # try = data.frame(diff(as.matrix(as.numeric(p.6078$time)/3600)))
   df$t.delta[df$t.delta>48] <- 0
   df$dists[df$t.delta>48] <- 0
-  for (i in 2:nrow(df)){
-    df$sum.dists[i]<- df$sum.dists[i-1]+df$dists[i]
-    df$sum.t[i]<- df$sum.t[i-1]+df$t.delta[i]
-  }
+  df <- within(df, sum.dists <- cumsum(dists))
+  df <- within(df, sum.t <- cumsum(t.delta))
   df$vel<- df$dists/df$t.delta
   df$s.vel<-df$sum.dists/df$sum.t
   df
 }
 
-df.new6194<-setUpWeek(p.6194)
-df.new6194<-shrink(df.new6194)
+
+lctready <- function(dat){
+  dfm<-setUpWeek(dat)
+  ready<-shrink(dfm)
+  ready
+}
 
 # Func 2: This draws the velocity, both weekly and cumulatively
 drawTrends <- function(df){
@@ -92,11 +96,12 @@ drawTrends <- function(df){
     geom_hline(yintercept=rev(df$s.vel)[1], color = "red", linetype="dashed")+
     geom_hline(yintercept=(rev(df$s.vel)[1]*1.1),linetype="dashed",color = "blue")+
     geom_hline(yintercept=(rev(df$s.vel)[1]*0.9),linetype="dashed",color = "blue")+
-    theme_light()+
-    labs(y="Speed (km/h)",title=paste("ID:", 
+    theme(text = element_text(size=15),
+          axis.text.x = element_text(angle=0, hjust=1)) + theme_bw(base_size = 16)+
+    labs(y="Speed (km/h)", x = "Week", title=paste("ID:", 
                                       df$personid,  sep=" "))
 }
-drawTrends(df.new619)
+drawTrends(df.new6168)
 
 #########################################################
 # Func 4: Generate Frequencies
@@ -139,10 +144,22 @@ legend("topright", inset=.05, title="Distribution",
        horiz=FALSE,lty=1)
 ## Barplots of Distributions
 library("scales")
-pts=c(-1,0,20,50,100,500,2000,15000)
+pts=c(-1,0,100,500,2000,15000)
 xx<-barplot(table(cut(freq$Freq,pts)),
-            names=c("0","(0,20]","(20,50]","(50,100]","(100,500]","(500,2000]","2000+"),
-            xlab="count",ylab="Frequency", ylim=c(0,7000),main="Number of Observations Per Week")
+            names=c("0","(0,100]","(100,500]","(500,2000]","2000+"),
+            xlab="count",ylab="Frequency", ylim=c(0,7000))
+t$Tpe<-Count2/sum(Count2)
+t$Perc<-paste(sprintf("%.1f", t$Tpe*100),"%")
+t
+g<-ggplot(data=t, aes(x=Count, y=Freq, fill=`Day of Week`)) +
+  geom_bar(stat="identity", position=position_dodge())+geom_text(aes(label=Perc), vjust=-0.3, color="black",
+                                                                 position = position_dodge(1), size=4.4) +
+  scale_fill_brewer(palette="Paired")+
+  labs(y="Frequency") +
+  theme_bw(base_size = 15)
+
+g
+
 ## Add text at top of bars
 text(x = xx, y = t$Freq, label = t$perc, pos = 3, cex = 0.8, col = "red")
 ### Func 3: Weekday Seasonality Plot (A bit less rough, update 12/11)
