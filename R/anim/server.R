@@ -1,8 +1,8 @@
 ######################################################################
 # R Shiny Server File for Mobility Visualizer
 # Author: Zhihang Dong
-# Date: 11/13/2018
-# Version: 0.0.2.
+# Date: 1/13/2019
+# Version: 0.1.0.
 # This is the server logic of a Shiny web application. You can run the 
 # application by clicking 'Run App' above.
 #
@@ -18,19 +18,19 @@
 ##############################################################
 # Load Required Packages
 {library(shiny)
-library(sp)
-library(sf)
-library(rgdal)
-library(raster)
-library(GISTools)
-library(raster)
-library(spdep)
-library(plyr)
-library(ggplot2)
-library(rsatscan)
-library(smerc)
-library(reshape)
-library(maptools)}
+  library(sp)
+  library(sf)
+  library(rgdal)
+  library(raster)
+  library(GISTools)
+  library(raster)
+  library(spdep)
+  library(plyr)
+  library(ggplot2)
+  library(rsatscan)
+  library(smerc)
+  library(reshape)
+  library(maptools)}
 
 # Time stamp translates timestamp from raw format to POSIXt format, and calculates
 # cumulative time and week. No need to do this for formatted data.
@@ -75,7 +75,7 @@ drawGrid <- function(xdim, ydim, xfrom = 284374.8, xto = 365936.1,
   xy<-expand.grid(x=x, y=y)
   # Project points to spdf format
   grid.pts = SpatialPointsDataFrame(coords = xy, data = xy, 
-                                   proj4string = CRS("+proj=utm +zone=32 +datum=WGS84"))
+                                    proj4string = CRS("+proj=utm +zone=32 +datum=WGS84"))
   gridded(grid.pts) = TRUE
   grid = as(grid.pts, "SpatialPolygons")
   
@@ -133,7 +133,7 @@ trimCell <- function(leastObs, gridFile, pointFile, gridCountFile){
 }
 
 # Notes: Must run function gridCount before running flexScan
-flexScan <- function(gridFile, pointFile, nbQueen = TRUE, zeroPolicy = TRUE){
+flexScan <- function(gridFile, pointFile, nbQueen = FALSE, zeroPolicy = TRUE){
   res = over(pointFile,gridFile)
   tab = table(res)
   qid = NULL
@@ -224,27 +224,27 @@ plotL1map <- function(gridFile, fullCount, currentCount){
     L1Count$prop[i] = abs(fullCount$prop[i] - currentCount$prop[i]) 
   }
   quadframe1 = SpatialPolygonsDataFrame(gridFile,data=as.data.frame(L1Count))
-  manual.col = colorRampPalette(c("#f7f6fd","#4635d0"))
+  manual.col = colorRampPalette(c("#FFFFD4", "#FED98E", "#FE9929","#CC4C02"))
   color.match1 = manual.col(length(unique(quadframe1@data$prop)))
   lookupTable1 = sort(unique(quadframe1@data$prop))
   quadframe1$color = color.match1[match(quadframe1@data$prop, lookupTable1)]  
   l1error = sum(L1Count$prop)
-  {par(mfrow=c(1,1))
-   plot(quadframe1, col=quadframe1$color, border="light gray", lwd=0.5, 
-        main = paste("L1 Error Map: L1 =", l1error, sep = " "), axes= TRUE)
+  {par(mfrow=c(1,1))()
+    plot(quadframe1, col=quadframe1$color, border="light gray", lwd=0.5, 
+         main = paste("L1 Error Map: L1 =", l1error, sep = " "), axes= TRUE)
   }
 }
 
 plotPropmap <- function(gridFile, pointFile1, pointFile2, gridCountFile1, gridCountFile2){
   quadframe1 <-SpatialPolygonsDataFrame(gridFile,data=as.data.frame(gridCountFile1))
-  manual.col = colorRampPalette(c("#f7f6fd","#4635d0"))
+  manual.col = colorRampPalette(c("#FFFFD4", "#FED98E", "#FE9929","#CC4C02"))
   color.match1 = manual.col(length(unique(quadframe1@data$prop)))
   lookupTable1 = sort(unique(quadframe1@data$prop))
   quadframe1$color = color.match1[match(quadframe1@data$prop, lookupTable1)]
   quadframe2 <-SpatialPolygonsDataFrame(gridFile,data=as.data.frame(gridCountFile2))
   color.match2 = manual.col(length(unique(quadframe2@data$prop)))
   lookupTable2 = sort(unique(quadframe2@data$prop))
-  quadframe2$color = color.match1[match(quadframe2@data$prop, lookupTable2)]
+  quadframe2$color = color.match2[match(quadframe2@data$prop, lookupTable2)]
   {par(mfrow=c(1,2))
     plot(quadframe1, col=quadframe1$color, border="light gray", lwd=0.5, main = "Current Proportion Map", axes= TRUE)
     plot(pointFile1, col='pink', add =TRUE, cex = 0.05, pch = 1)
@@ -283,3 +283,5 @@ shinyServer(function(input, output) {
     }
   })
 })
+                                            
+                                            
