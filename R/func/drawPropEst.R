@@ -1,5 +1,5 @@
 ##########################################################################################################
-# CDC Distance Generator 
+# CDC Proportional Estimator Drawing
 # Zhihang Dong
 # Version 0.5
 # 3/6/2019
