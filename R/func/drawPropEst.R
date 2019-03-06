@@ -4,7 +4,27 @@
 # Version 0.5
 # 3/6/2019
 ##########################################################################################################
+
+# Import just one library
 library(dplyr)
+
+# ====================================================================================================================
+# @Function 1: rankProp gives you a smaller dataset grouped by the coordinate of the data points 
+# rounded to the closest 0.5 increment. For example, a datapoint P(36.229, 39.581) will be giving you
+# (36.0, 39.5). These grouped data points naturally into several groups. We then calculate the proportion of
+# time spent in each group as the percentage of the entire length of observation
+#
+# @Function 2: getFinalLvSet gives you the coordinate pair groups selected by the given levelSet
+# Warning: when one group does not fulfill the levelSet requirement, the function will automatically append
+# the second largest group, until the levelSet minimum has been fulfilled. 
+# Warning 2: levelSet in our definition has been inflated 100 times. For example, a lambda of 0.1 should be written 
+# as "10".
+#
+# @Function 3: propLvSet calculates our proportional estimator, which gives the first week, following when we have never 
+# observed any differences of the coordinate group produced by the getFinalLvSet algorithms.
+#
+# @Function 4: drawLevelSets gives you the line plot of our PropEstimator given an increment value (5 or 10 recommended)
+# =====================================================================================================================
 
 rankProp <- function(dat){
   dat$long = round(dat$long*2, digit = 1)/2
@@ -30,7 +50,6 @@ getFinalLvSet <- function(proptab, levelSet){
   topdat
 }
 
-
 # topdat = getFinalLvSet(proptab, 20)
 
 propLvSet <- function(dat, lvSet){
@@ -51,8 +70,8 @@ propLvSet <- function(dat, lvSet){
   }
 }
 
-resulted = propLvSet(dat,20)
-resulted
+# resulted = propLvSet(dat,20)
+# resulted
 
 drawLevelSets <- function(dat, incre){
   finalResults = c()
@@ -75,7 +94,7 @@ drawLevelSets <- function(dat, incre){
   text(x=85, y=max(dat$week + 3), labels="Max Length", col="blue")
 }
 
-
 # Experimental Section
 # dat = person_6072
 # drawLevelSets(dat,10)
+# Voila
