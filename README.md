@@ -3,5 +3,5 @@
 
 ## Collaborators
 
-Yen-Chi Chen, Adrian Dobra, Zhihang Dong
+Zhihang Dong, Yen-Chi Chen, Adrian Dobra
 
