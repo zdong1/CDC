@@ -23,7 +23,12 @@ library(dplyr)
 # @Function 3: propLvSet calculates our proportional estimator, which gives the first week, following when we have never 
 # observed any differences of the coordinate group produced by the getFinalLvSet algorithms.
 #
-# @Function 4: drawLevelSets gives you the line plot of our PropEstimator given an increment value (5 or 10 recommended)
+# @Function 4: drawLevelSets gives you the line plot of our PropEstimator given a step size,
+# which, by essence, is an increment value (5 or 10 recommended)
+# There are two types of visualization to choose from: 
+# 1) Color Segments, which colors represent the amount of anchorLocations we have so far in our resulted dataset
+# red = 1; orange = 2; green = 3-4; blue = 5-+inf
+# 2) Annotaton of ANCH LOC numbers: a black text will appear above each step size \eta.
 # =====================================================================================================================
 
 rankProp <- function(dat){
@@ -37,9 +42,8 @@ rankProp <- function(dat){
   proptab = proptab[order(-proptab$prop_per),]
 }
 
-
-
-getFinalLvSet <- function(proptab, levelSet){
+getFinalLvSet <- function(tab, levelSet){
+  proptab = rankProp(tab)
   for (k in 1:nrow(proptab)){
     topdat = head(proptab, k)
     if (sum(topdat$prop_per)>levelSet){
@@ -50,15 +54,13 @@ getFinalLvSet <- function(proptab, levelSet){
   topdat
 }
 
-# topdat = getFinalLvSet(proptab, 20)
+# topdat = getFinalLvSet(tab, 20)
 
 propLvSet <- function(dat, lvSet){
-  proptab = rankProp(dat)
-  topdat = getFinalLvSet(proptab, levelSet = lvSet)
+  topdat = getFinalLvSet(dat, levelSet = lvSet)
   for (i in max(dat$week):1){
     newdat = dat[which(dat$week <= i), ]
-    newptab = rankProp(newdat)
-    newtopdat = getFinalLvSet(newptab,levelSet = lvSet)
+    newtopdat = getFinalLvSet(newdat,levelSet = lvSet)
     if (i == 1){
       return(i)
       break
@@ -73,28 +75,57 @@ propLvSet <- function(dat, lvSet){
 # resulted = propLvSet(dat,20)
 # resulted
 
-drawLevelSets <- function(dat, incre){
+drawLevelSets <- function(dat, incre, anchorCount = TRUE, coloredLines = TRUE,
+                          annotateLocation = FALSE){
   finalResults = c()
   bins = c()
+  countAnchorLocations = c()
   for (j in seq(10, 100, incre)){
     results = propLvSet(dat, j)
     finalResults = append(finalResults, results)
     bins = append(bins, j)
+    if(anchorCount == TRUE){
+      locCounts = nrow(getFinalLvSet(dat, j))
+      countAnchorLocations = append(countAnchorLocations, locCounts)
+    }
   }
   if(dat$gen[1] == 1){
-    cala = "darkgreen"
+    cala = 16
   } else if(dat$gen[1] == 2){
-    cala = "deeppink"
+    cala = 17
   } else{
-    cala = "orange"
+    cala = 18
   }
-  plot(finalResults~bins, bty = "l", type ="b", pch=19, cex = 0.5, col=cala, 
-       ylim=c(0,max(dat$week)*1.3), xlim=c(0,100), ylab="Estimator Results", xlab="LevelSets")
+  if(annotateLocation == TRUE){
+    plot(finalResults~bins, bty = "l", type ="b", pch=cala, cex = 0.9, col="black", 
+         ylim=c(0,max(dat$week)*1.3), xlim=c(0,100), ylab="Estimator Results", xlab="LevelSets")
+    text(bins, finalResults, countAnchorLocations,
+         cex=0.9, pos=3,col="black") 
+  } else if(coloredLines == TRUE){
+    lincol = c()
+    for(m in 1:length(countAnchorLocations)){
+      if(countAnchorLocations[m] == 1){
+        lincol = append(lincol, "red")
+      } else if(countAnchorLocations[m] == 2){
+        lincol = append(lincol, "orange")
+      } else if(countAnchorLocations[m] <= 4){
+        lincol = append(lincol, "green")
+      } else if(countAnchorLocations[m] > 4){
+        lincol = append(lincol, "blue")
+      }
+    }
+    plot(finalResults~bins, type ="b", pch=cala, cex = 0.9, col=lincol, 
+         ylim=c(0,max(dat$week)*1.3), xlim=c(0,100), ylab="Estimator Results", xlab="LevelSets")
+    segments(bins[-length(bins)],finalResults[-length(finalResults)],bins[-1L],finalResults[-1L],
+             col=lincol, lwd = 3)
+  }
+  
   abline(h=max(dat$week), col="red")
   text(x=85, y=max(dat$week + 3), labels="Max Length", col="blue")
 }
 
 # Experimental Section
-# dat = person_6072
-# drawLevelSets(dat,10)
-# Voila
+# dat = person_5976
+# drawLevelSets(dat,10, anchorCount = TRUE, coloredLines = TRUE, annotateLocation = FALSE)
+# Voila!
+
